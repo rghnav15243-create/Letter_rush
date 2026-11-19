@@ -3258,7 +3258,7 @@ $('i1').addEventListener('input',livePreview);
 $('i1').addEventListener('keydown',e=>{if(e.key==='Enter')submit(0)});
 $('i2').addEventListener('keydown',e=>{if(e.key==='Enter')submit(1)});
 $('local').onclick=()=>{BOT=MODE==='bot'?{lvl:botLvl}:null;start('local')};
-const WEB="https://rghnav15243-create.github.io/letter_rush/";
+const WEB="https://rghnav15243-create.github.io/Letter_rush/";
 let JOIN=null;{const m=location.hash.match(/^#join=([A-Za-z0-9]{5})/);if(m)JOIN=m[1].toUpperCase()}
 const MODE=(location.hash||'#online').slice(1);
 show('online',MODE==='online');show('local',MODE==='local'||MODE==='bot');show('botcard',MODE==='bot');if(MODE==='bot')botChips($('botlv'));$('local').textContent='Start';$('local').className='';
