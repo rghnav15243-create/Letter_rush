@@ -262,6 +262,41 @@ b{font-weight:700}.card>b:first-child{font-size:1.2rem}
 .hmsecret{-webkit-text-security:disc;text-security:disc;letter-spacing:3px;text-align:center;font-size:1.4rem}
 .hmchips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-height:150px;overflow-y:auto;padding:2px}
 .hmchips .wchip.bad{background:transparent;border-style:dashed;opacity:.8;text-decoration:line-through}
+
+/* ===== Imposter ===== */
+#imp{max-width:460px;margin:0 auto}
+.imnames{display:flex;flex-wrap:wrap;gap:6px}
+.imname{display:inline-flex;align-items:center;gap:6px;padding:6px 6px 6px 12px;border-radius:999px;background:var(--tile);border:2px solid var(--line);font-weight:700}
+.imname button{width:28px;height:28px;padding:0;border-radius:50%;font-size:1rem;background:var(--line);color:var(--ink);box-shadow:none;animation:none}
+.imrow{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:700}
+.imstep{display:flex;align-items:center;gap:8px}.imstep button{width:44px;height:44px;padding:0;font-size:1.4rem;border-radius:12px;animation:none}
+.imstep b{min-width:2ch;text-align:center;font-size:1.5rem}
+.imtog{width:auto;padding:8px 16px;border-radius:999px;animation:none}.imtog.off{background:var(--line);color:var(--mute);box-shadow:none}
+.imcats{display:flex;flex-wrap:wrap;gap:6px}.imcats button{width:auto;padding:6px 12px;border-radius:999px;font-size:.9rem;animation:none;background:var(--line);color:var(--mute);box-shadow:none}
+.imcats button.on{background:var(--acc);color:#fff}
+.imhold{position:relative;min-height:230px;border-radius:24px;border:3px dashed var(--line);display:grid;place-items:center;text-align:center;padding:18px;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;cursor:pointer;background:var(--tile)}
+.imhold .cover{font-weight:700;font-size:1.2rem;color:var(--mute)}.imhold .cover big{display:block;font-size:3rem;margin-bottom:6px}
+.imhold .face{display:none}.imhold.open .face{display:block;animation:hlin .3s var(--spring) both}.imhold.open .cover{display:none}
+.imhold.open{border-style:solid;border-color:var(--acc)}
+.imhold.open.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--tile))}
+.imword{font-size:clamp(2rem,10vw,3rem);font-weight:700;line-height:1.1}
+.imimp{font-size:clamp(2.4rem,13vw,3.6rem);font-weight:800;color:var(--bad);letter-spacing:2px;text-transform:uppercase;text-shadow:0 4px 0 color-mix(in srgb,var(--bad) 35%,#000)}
+.imsmall{font-weight:600;color:var(--mute);margin-top:8px}
+.imbig{font-size:2rem;font-weight:800;text-align:center;line-height:1.15}
+.imbig.crew{color:var(--ok)}.imbig.imp{color:var(--bad)}
+.implist{display:flex;flex-direction:column;gap:6px}
+.implist .p{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:14px;background:var(--tile);border:2px solid var(--line);font-weight:700}
+.implist .p small{font-weight:600;color:var(--mute)}
+.implist .p .tag{padding:3px 10px;border-radius:999px;font-size:.8rem;font-weight:800;background:var(--ok);color:#fff}
+.implist .p .tag.imp{background:var(--bad)}
+.implist button.p{width:100%;justify-content:space-between;color:var(--ink);box-shadow:0 4px 0 var(--tile-d);animation:none}
+.implist button.p.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,var(--tile))}
+.imopts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.imopts button{animation:none}
+
+#mmlobby .bigb{padding:20px 16px;font-size:1.35rem;border-radius:20px}
+#mmFriend.bigb{background:#20b26c;box-shadow:0 6px 0 #13814c}#mmFriend.bigb:active{box-shadow:0 1px 0 #13814c}
+#mmhostv .qr{width:min(200px,58vw)}
 </style></head><body><main>
 <header><h1 class="logo" aria-label="Letter Rush"><span>L</span><span>E</span><span>T</span><span class="r">T</span><span>E</span><span>R</span><span class="sp"></span><span>R</span><span>U</span><span class="r">S</span><span>H</span></h1><div style="display:flex;gap:8px"><button class="ib" id="helpb" aria-label="How to play">?</button><button class="ib" id="snd" aria-label="Sound">🔊</button><button id="theme" aria-label="Light or dark">🌙</button></div></header>
 
@@ -304,17 +339,18 @@ b{font-weight:700}.card>b:first-child{font-size:1.2rem}
     <input id="mmName" type="text" style="text-transform:none" placeholder="Username (new account)" autocapitalize="off" spellcheck="false">
     <div class="row"><button id="mmIn">Sign in</button><button id="mmUp" class="alt">Create account</button></div></div></div>
   <div class="card stack hide" id="mmlobby"><div id="mmprof"></div><div id="mlevels"></div>
-    <button id="mmFind">Play ranked</button>
-    <div class="row"><button class="alt" id="mmFriend">Play a friend</button><button class="alt" id="mmLb">Leaderboard</button></div>
+    <button id="mmFind" class="bigb">⚡ Quick match</button>
+    <button id="mmFriend" class="bigb">🤝 Play a friend</button>
     <button class="alt hide" id="mmLink">Save account with Google</button>
-    <div class="links"><button id="mmOut">Sign out</button><button id="mmSet">Server settings</button></div></div>
+    <div class="links"><button id="mmLb">Leaderboard</button><button id="mmOut">Sign out</button><button id="mmSet">Server settings</button></div></div>
   <div class="card stack hide" id="mmfriend"><b>Play a friend</b><p class="note" id="fLvl"></p>
     <button id="fCreate">Create room</button>
-    <div class="or">or join your friend’s room</div>
-    <div class="row"><input id="fCode" type="text" style="text-transform:uppercase;letter-spacing:4px" placeholder="CODE" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false"><button id="fJoin" class="alt">Join</button></div>
     <button class="alt" id="fBack">Back</button></div>
   <div class="card stack hide" id="mmhostv"><b>Your room code</b><div class="code" id="fShow"></div><div class="qr" id="fQr"></div><p class="note" style="text-align:center">Scan with any phone camera to play. No app needed.</p><p class="note" id="fInfo"></p>
-    <button id="fLink">Copy link</button><button id="fCopy" class="alt">Copy code</button><button class="alt" id="fCancel">Cancel</button></div>
+    <div class="row"><button id="fLink">Copy link</button><button id="fCopy" class="alt">Copy code</button></div>
+    <div class="or">or join your friend’s room</div>
+    <div class="row"><input id="fCode" type="text" style="text-transform:uppercase;letter-spacing:4px" placeholder="CODE" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false"><button id="fJoin" class="alt">Join</button></div>
+    <div class="links"><button id="fCancel">Back</button></div></div>
   <div class="card stack hide" id="mmlbv"><b>Leaderboard</b><p class="note" id="lbMe"></p><div id="lbList" class="lb"></div><button class="alt" id="lbBack">Back</button></div>
   <div class="card stack hide" id="mmren"><b>Change username</b>
     <input id="rnName" type="text" style="text-transform:none" maxlength="16" autocomplete="off" autocapitalize="off" spellcheck="false">
@@ -356,6 +392,17 @@ b{font-weight:700}.card>b:first-child{font-size:1.2rem}
   </div>
   <div id="hmres" class="card stack hide"></div>
 </section>
+<section id="imp" class="hide">
+  <div class="card stack hide" id="imsetup"></div>
+  <div class="card stack hide" id="imonl"></div>
+  <div class="card stack hide" id="imroom"></div>
+  <div class="card stack hide" id="imcard"></div>
+  <div class="card stack hide" id="imtalk"></div>
+  <div class="card stack hide" id="imvote"></div>
+  <div class="card stack hide" id="imguess"></div>
+  <div class="card stack hide" id="imdone"></div>
+  <div class="msg" id="immsg"></div>
+</section>
 <section id="wh" class="hide">
   <div class="card stack" id="whpre"><b id="whpt">Word Hunt</b><p class="note" id="whpi"></p><div id="whbotlv" class="hide"></div><button id="whstart">Start</button><div class="links"><button id="whback">Back to menu</button></div></div>
   <div id="whplay" class="hide">
@@ -387,7 +434,7 @@ b{font-weight:700}.card>b:first-child{font-size:1.2rem}
   <div class="links"><button id="quit">Leave match</button></div>
 </section>
 </main>
-<script>(function(){var m=location.hash.match(/^#join=[A-Za-z0-9]{5}(?:&l=(he|en))?/);if(m&&m[1]){try{localStorage.setItem('lr-lang',m[1])}catch(e){}}
+<script>(function(){var m=location.hash.match(/^#(?:join|imp)=[A-Za-z0-9]{5}(?:&l=(he|en))?/);if(m&&m[1]){try{localStorage.setItem('lr-lang',m[1])}catch(e){}}
 var he=false;try{he=localStorage.getItem('lr-lang')==='he'}catch(e){}if(he)document.write('<script src="he_dict.js" charset="utf-8"><\/script>')})()</script>
 <script>
 //---------------------------------------------------------------------
@@ -2911,6 +2958,9 @@ const Net=(()=>{
     hmGuess:(id,l)=>rpc('hm_guess',{p_match:id,p_letter:toT(l)}),
     hmState:id=>rpc('hm_state',{p_match:id}),
     hmResults:id=>rpc('hm_results',{p_match:id}),
+    impCreate:()=>rpc('imp_create',{p_lang:LANG}),impJoin:c=>rpc('imp_join',{p_code:c}),impLeave:c=>rpc('imp_leave',{p_code:c}),impKick:(c,u)=>rpc('imp_kick',{p_code:c,p_user:u}),
+    impStart:(c,n,hi,cats)=>rpc('imp_start',{p_code:c,p_imposters:n,p_hint:hi,p_cats:cats}),impSeen:c=>rpc('imp_seen',{p_code:c}),impNext:c=>rpc('imp_next',{p_code:c}),
+    impVote:(c,t)=>rpc('imp_vote',{p_code:c,p_target:t}),impGuess:(c,w)=>rpc('imp_guess',{p_code:c,p_word:w}),impState:c=>rpc('imp_state',{p_code:c}),
     createRoom:l=>rpc('create_private_room',{p_level:l,p_game:MG,p_lang:LANG}),
     joinRoom:c=>rpc('join_private_room',{p_code:c}),
     cancelRoom:()=>rpc('cancel_private_room'),
@@ -2946,7 +2996,7 @@ function clearTimers(){clearInterval(mQ);clearInterval(mHq);clearInterval(mRp);c
 const tier=r=>r<950?['Bronze','#a0673a']:r<1100?['Silver','#7c8798']:r<1250?['Gold','#c99a06']:r<1400?['Platinum','#2a9d9d']:r<1600?['Diamond','#4a72e8']:['Master','#a43fc9'];
 function mchips(){const c=$('mlevels');c.innerHTML='';LV.forEach((l,i)=>{const b=document.createElement('button');b.className='chip'+(i===lvl?' on':'');b.innerHTML='<b>'+l.n+'</b><span>'+l.r+' letters</span>';b.onclick=()=>{lvl=i;mchips()};c.appendChild(b)})}
 function mmOpen(){
-  mode=null;show('menu',false);show('game',false);show('solo',false);show('mm');mMsg('');
+  mode=null;show('menu',false);show('game',false);show('solo',false);show('imp',false);show('mm');mMsg('');
   const url=st('lr-sb-url')||(window.LR_SB&&window.LR_SB.url)||'',key=st('lr-sb-key')||(window.LR_SB&&window.LR_SB.key)||'';
   $('sbUrl').value=url;$('sbKey').value=key;
   if(!url||!key){mView('mmcfg');return}
@@ -2957,7 +3007,7 @@ async function mmBoot(url,key){
     if(!window.supabase){mMsg('Online library missing',true);mView('mmcfg');return}
     const u=await Net.init(url,key);
     if(await lrAuthCallback())return;
-    if(u)mLobby();else{mView('mmauth');if(JOIN){$('gName').value='Player'+(100+Math.floor(Math.random()*900));const hd=$('mmauth').querySelector('b');if(hd)hd.textContent='⚔️ You’ve been challenged!';mMsg('Pick a name and tap Let’s go.')}}
+    if(u)mLobby();else{mView('mmauth');if(JOIN||(typeof IMPJ!=='undefined'&&IMPJ)){$('gName').value='Player'+(100+Math.floor(Math.random()*900));const hd=$('mmauth').querySelector('b');if(hd)hd.textContent=(typeof IMPJ!=='undefined'&&IMPJ)?'🕵️ You’re invited to Imposter!':'⚔️ You’ve been challenged!';mMsg('Pick a name and tap Let’s go.')}}
   }catch(e){mMsg(eMsg(e),true);mView('mmcfg')}
 }
 $('sbSave').onclick=()=>{sv('lr-sb-url',$('sbUrl').value.trim().replace(/\/+$/,''));sv('lr-sb-key',$('sbKey').value.trim());mmOpen()};
@@ -2997,7 +3047,7 @@ $('mmOut').onclick=()=>{if(Net.isGuest()){mView('mmoutv');return}doSignOut()};
 $('outYes').onclick=doSignOut;$('outNo').onclick=()=>mLobby();
 $('rnBack').onclick=()=>mLobby();
 $('rnSave').onclick=async()=>{const n=$('rnName').value.trim();if(!/^[A-Za-z0-9_]{3,16}$/.test(n)){mMsg('Username: 3-16 letters, numbers or _',true);return}try{await Net.rename(n);mMsg('Name changed');mLobby()}catch(e){mMsg(eMsg(e),true)}};
-$('mmFriend').onclick=()=>{mMsg('');mView('mmfriend');$('fLvl').textContent=MG==='hm'?'Hangman: a 100-second race on the same words.':MG==='wh'?'Word Hunt: same board for both of you, 80 seconds.':'Level: '+LV[lvl].n+' ('+LV[lvl].r+' letters). Change it in the lobby.';$('fCode').value=''};
+$('mmFriend').onclick=()=>{mMsg('');$('fCreate').click();$('fLvl').textContent=MG==='hm'?'Hangman: a 100-second race on the same words.':MG==='wh'?'Word Hunt: same board for both of you, 80 seconds.':'Level: '+LV[lvl].n+' ('+LV[lvl].r+' letters). Change it in the lobby.';$('fCode').value=''};
 $('fBack').onclick=()=>mLobby();
 $('fCreate').onclick=async()=>{try{const r=await Net.createRoom(lvl+1);if(r.status==='matched'){mmEnter(r.match_id);return}showRoom(r.code)}catch(e){mMsg(eMsg(e),true)}};
 function showRoom(code){
@@ -3011,7 +3061,7 @@ function showRoom(code){
 }
 $('fLink').onclick=()=>{const u=$('fLink').dataset.u;try{navigator.clipboard.writeText(u).then(()=>{$('fLink').textContent='Link copied'},()=>{$('fLink').textContent=u})}catch(e){$('fLink').textContent=u}};
 $('fCopy').onclick=()=>{const c=$('fShow').textContent;try{navigator.clipboard.writeText(c).then(()=>{$('fCopy').textContent='Copied'},()=>{$('fCopy').textContent=c})}catch(e){$('fCopy').textContent=c}};
-$('fCancel').onclick=async()=>{clearInterval(mHq);Net.unlisten();try{const r=await Net.cancelRoom();if(r.status==='matched'){mmEnter(r.match_id);return}}catch(e){}mView('mmfriend')};
+$('fCancel').onclick=async()=>{clearInterval(mHq);Net.unlisten();try{const r=await Net.cancelRoom();if(r.status==='matched'){mmEnter(r.match_id);return}}catch(e){}mLobby()};
 $('fJoin').onclick=async()=>{const c=$('fCode').value.trim().toUpperCase();if(c.length!==5){mMsg('Enter the 5-character code',true);return}try{mMsg('…');const r=await Net.joinRoom(c);mMsg('');mmEnter(r.match_id)}catch(e){mMsg(eMsg(e),true)}};
 $('lbBack').onclick=()=>mLobby();
 $('mmLb').onclick=async()=>{
@@ -3024,6 +3074,7 @@ $('mmLb').onclick=async()=>{
 };
 $('mmBack').onclick=()=>{Net.stop();clearTimers();goMenu()};
 async function mLobby(){
+  if(typeof IMPGO!=='undefined'&&IMPGO){const f=IMPGO;IMPGO=null;show('mm',false);f();return}
   if(JOIN){const c=JOIN;JOIN=null;try{mMsg('…');const r=await Net.joinRoom(c);mMsg('');mmEnter(r.match_id);return}catch(e){setTimeout(()=>mMsg(eMsg(e),true),60)}}
   M=null;mode=null;clearInterval(mRp);clearInterval(mHq);Net.unlisten();show('game',false);show('wh',false);if(typeof whStop==='function')whStop();show('hm',false);if(typeof hmStop==='function')hmStop();show('mm');mView('mmlobby');mchips();
   try{
@@ -3031,7 +3082,7 @@ async function mLobby(){
     $('mmprof').innerHTML='<div class="top"><button class="nameb" id="pName" aria-label="Change username">'+esc(p.username)+' ✎</button><span class="tp" style="background:'+t[1]+'">'+t[0]+'</span></div>'+
       '<div class="rt"><b>'+p.rating+'</b><small> '+(MG==='hm'?'Hangman':MG==='wh'?'Word Hunt':'Letter Rush')+' rating · best '+p.best_rating+'</small></div>'+
       '<small>'+p.wins+'W · '+p.losses+'L · '+p.draws+'D · '+Math.round(Number(p.win_rate)*100)+'% wins · 🔥 '+p.win_streak+' streak (best '+p.best_streak+')</small>'+
-      '<small>⭐ '+p.total_score+' points · 👑 '+p.crowns+' crowns'+(Net.isGuest()?' · Guest account':'')+'</small>';
+      (Net.isGuest()?'<small>Guest account</small>':'');
     $('pName').onclick=()=>{mMsg('');mView('mmren');$('rnName').value=p.username};
     show('mmLink',Net.isGuest());
     if(wantName&&p.username!==wantName)mMsg('“'+wantName+'” was taken, so you’re '+p.username+'. Tap your name to change it.');
@@ -3338,7 +3389,7 @@ const WEB="https://rghnav15243-create.github.io/Letter_rush/";
 let JOIN=null;{const m=location.hash.match(/^#join=([A-Za-z0-9]{5})/);if(m)JOIN=m[1].toUpperCase()}
 const MODE=(location.hash||'#online').slice(1);
 show('online',MODE==='online');show('local',MODE==='local'||MODE==='bot');show('botcard',MODE==='bot');if(MODE==='bot')botChips($('botlv'));$('local').textContent='Start';$('local').className='';
-if(JOIN)mmOpen();else if(MODE==='single')soloMenu();else if(MODE==='match')mmOpen();else if(MODE==='match-wh'){MG='wh';mmOpen()}else if(MODE.startsWith('wh-'))show('menu',false);else if(MODE==='match-hm'){MG='hm';mmOpen()}else if(MODE.startsWith('hm-'))show('menu',false);
+if(JOIN)mmOpen();else if(MODE==='single')soloMenu();else if(MODE==='match')mmOpen();else if(MODE==='match-wh'){MG='wh';mmOpen()}else if(MODE.startsWith('wh-'))show('menu',false);else if(MODE==='match-hm'){MG='hm';mmOpen()}else if(MODE.startsWith('hm-'))show('menu',false);else if(MODE.startsWith('imp'))show('menu',false);
 $('quit').onclick=()=>{if(BOT&&BOT.fromLobby){BOT=null;done=true;gen++;clearInterval(ticker);show('game',false);mLobby();return}if(mode==='match'){mmLeave();return}if(mode==='single'){soloQuit();return}if(MODE!=='online'){goMenu();return}resetOnline();mode=null;done=true;gen++;clearInterval(ticker);show('game',false);show('menu');$('menuMsg').textContent=''};
 </script><script>
 /* ===== Word Hunt ===== */
@@ -3974,6 +4025,250 @@ async function hmOnlineEnd(s){
 
 if(typeof MODE!=='undefined'&&MODE.startsWith('hm-'))hmOpen(MODE.slice(3));
 </script><script>
+/* ===== Imposter ===== */
+const IMP_CATS=[{"k": "food", "en": "Food", "he": "אוכל", "w": [["pizza", "פיצה"], ["banana", "בננה"], ["chocolate", "שוקולד"], ["hamburger", "המבורגר"], ["sushi", "סושי"], ["ice cream", "גלידה"], ["pasta", "פסטה"], ["falafel", "פלאפל"], ["hummus", "חומוס"], ["pancake", "פנקייק"], ["popcorn", "פופקורן"], ["salad", "סלט"], ["sandwich", "כריך"], ["cheese", "גבינה"], ["egg", "ביצה"], ["watermelon", "אבטיח"], ["strawberry", "תות"], ["soup", "מרק"], ["bread", "לחם"], ["cake", "עוגה"]]}, {"k": "animals", "en": "Animals", "he": "חיות", "w": [["lion", "אריה"], ["elephant", "פיל"], ["giraffe", "ג׳ירפה"], ["dolphin", "דולפין"], ["penguin", "פינגווין"], ["monkey", "קוף"], ["snake", "נחש"], ["cat", "חתול"], ["dog", "כלב"], ["horse", "סוס"], ["shark", "כריש"], ["eagle", "נשר"], ["turtle", "צב"], ["rabbit", "ארנב"], ["bear", "דוב"], ["camel", "גמל"], ["frog", "צפרדע"], ["owl", "ינשוף"], ["cow", "פרה"], ["spider", "עכביש"]]}, {"k": "places", "en": "Places", "he": "מקומות", "w": [["beach", "חוף ים"], ["school", "בית ספר"], ["hospital", "בית חולים"], ["airport", "שדה תעופה"], ["library", "ספרייה"], ["supermarket", "סופרמרקט"], ["cinema", "קולנוע"], ["zoo", "גן חיות"], ["museum", "מוזיאון"], ["park", "פארק"], ["restaurant", "מסעדה"], ["gym", "חדר כושר"], ["bank", "בנק"], ["hotel", "מלון"], ["desert", "מדבר"], ["forest", "יער"], ["farm", "חווה"], ["stadium", "אצטדיון"], ["mall", "קניון"], ["swimming pool", "בריכה"]]}, {"k": "jobs", "en": "Jobs", "he": "מקצועות", "w": [["doctor", "רופא"], ["teacher", "מורה"], ["pilot", "טייס"], ["chef", "שף"], ["firefighter", "כבאי"], ["police officer", "שוטר"], ["dentist", "רופא שיניים"], ["farmer", "חקלאי"], ["singer", "זמר"], ["soldier", "חייל"], ["nurse", "אח או אחות"], ["lawyer", "עורך דין"], ["builder", "פועל בניין"], ["photographer", "צלם"], ["waiter", "מלצר"], ["astronaut", "אסטרונאוט"], ["hairdresser", "ספר"], ["mechanic", "מכונאי"], ["actor", "שחקן"], ["judge", "שופט"]]}, {"k": "sports", "en": "Sports", "he": "ספורט", "w": [["football", "כדורגל"], ["basketball", "כדורסל"], ["tennis", "טניס"], ["swimming", "שחייה"], ["boxing", "אגרוף"], ["surfing", "גלישה"], ["skiing", "סקי"], ["running", "ריצה"], ["cycling", "רכיבה על אופניים"], ["volleyball", "כדורעף"], ["golf", "גולף"], ["karate", "קראטה"], ["chess", "שחמט"], ["bowling", "באולינג"], ["yoga", "יוגה"], ["gymnastics", "התעמלות"], ["baseball", "בייסבול"], ["climbing", "טיפוס"], ["skateboarding", "סקייטבורד"], ["horse riding", "רכיבה על סוסים"]]}, {"k": "home", "en": "At home", "he": "בבית", "w": [["sofa", "ספה"], ["fridge", "מקרר"], ["bed", "מיטה"], ["television", "טלוויזיה"], ["mirror", "מראה"], ["toothbrush", "מברשת שיניים"], ["pillow", "כרית"], ["lamp", "מנורה"], ["oven", "תנור"], ["washing machine", "מכונת כביסה"], ["clock", "שעון קיר"], ["window", "חלון"], ["door", "דלת"], ["shower", "מקלחת"], ["chair", "כיסא"], ["table", "שולחן"], ["carpet", "שטיח"], ["key", "מפתח"], ["blanket", "שמיכה"], ["kettle", "קומקום"]]}, {"k": "transport", "en": "Transport", "he": "תחבורה", "w": [["car", "מכונית"], ["bus", "אוטובוס"], ["train", "רכבת"], ["airplane", "מטוס"], ["bicycle", "אופניים"], ["ship", "ספינה"], ["motorcycle", "אופנוע"], ["helicopter", "מסוק"], ["taxi", "מונית"], ["scooter", "קורקינט"], ["submarine", "צוללת"], ["rocket", "רקטה"], ["tractor", "טרקטור"], ["ambulance", "אמבולנס"], ["truck", "משאית"], ["boat", "סירה"], ["hot air balloon", "כדור פורח"], ["elevator", "מעלית"], ["subway", "רכבת תחתית"], ["cable car", "רכבל"]]}, {"k": "clothes", "en": "Clothes", "he": "בגדים", "w": [["shirt", "חולצה"], ["pants", "מכנסיים"], ["dress", "שמלה"], ["shoes", "נעליים"], ["hat", "כובע"], ["socks", "גרביים"], ["coat", "מעיל"], ["scarf", "צעיף"], ["gloves", "כפפות"], ["pajamas", "פיג׳מה"], ["swimsuit", "בגד ים"], ["sunglasses", "משקפי שמש"], ["tie", "עניבה"], ["belt", "חגורה"], ["skirt", "חצאית"], ["boots", "מגפיים"], ["sweater", "סוודר"], ["sandals", "סנדלים"], ["uniform", "מדים"], ["backpack", "תיק גב"]]}, {"k": "nature", "en": "Nature", "he": "טבע", "w": [["sun", "שמש"], ["moon", "ירח"], ["rain", "גשם"], ["snow", "שלג"], ["rainbow", "קשת"], ["volcano", "הר געש"], ["river", "נהר"], ["mountain", "הר"], ["ocean", "אוקיינוס"], ["cloud", "ענן"], ["thunder", "רעם"], ["flower", "פרח"], ["tree", "עץ"], ["island", "אי"], ["waterfall", "מפל"], ["cave", "מערה"], ["star", "כוכב"], ["wind", "רוח"], ["sand", "חול"], ["earthquake", "רעידת אדמה"]]}, {"k": "things", "en": "Things", "he": "חפצים", "w": [["phone", "טלפון"], ["camera", "מצלמה"], ["umbrella", "מטרייה"], ["guitar", "גיטרה"], ["book", "ספר"], ["scissors", "מספריים"], ["candle", "נר"], ["balloon", "בלון"], ["piano", "פסנתר"], ["glasses", "משקפיים"], ["wallet", "ארנק"], ["computer", "מחשב"], ["headphones", "אוזניות"], ["pencil", "עיפרון"], ["watch", "שעון יד"], ["ladder", "סולם"], ["hammer", "פטיש"], ["map", "מפה"], ["ball", "כדור"], ["gift", "מתנה"]]}, {"k": "events", "en": "Holidays & events", "he": "חגים ואירועים", "w": [["birthday", "יום הולדת"], ["wedding", "חתונה"], ["hanukkah", "חנוכה"], ["purim", "פורים"], ["passover", "פסח"], ["rosh hashanah", "ראש השנה"], ["sukkot", "סוכות"], ["independence day", "יום העצמאות"], ["shabbat", "שבת"], ["bar mitzvah", "בר מצווה"], ["graduation", "מסיבת סיום"], ["concert", "הופעה"], ["picnic", "פיקניק"], ["camping", "קמפינג"], ["school trip", "טיול שנתי"], ["vacation", "חופשה"], ["new year", "סילבסטר"], ["halloween", "ליל כל הקדושים"], ["christmas", "חג המולד"], ["festival", "פסטיבל"]]}];
+const IMV=['imsetup','imonl','imroom','imcard','imtalk','imvote','imguess','imdone'];
+let IM={};var IMPGO=null;
+let IMPJ=null;{const m=location.hash.match(/^#imp=([A-Za-z0-9]{5})/);if(m)IMPJ=m[1].toUpperCase()}
+Object.assign(MERR,{room_busy:tr('That game is in the middle of a round. Join when it ends.','המשחק באמצע סיבוב. הצטרפו כשהוא נגמר.'),need_3_players:tr('You need at least 3 players','צריך לפחות 3 שחקנים'),
+  bad_imposters:tr('Too many imposters for this many players','יותר מדי מתחזים לכמות השחקנים'),not_in_room:tr('You’re not in this room','אתם לא בחדר הזה'),room_full:tr('The room is full','החדר מלא'),not_host:tr('Only the host can do that','רק המארח יכול לעשות את זה')});
+const imCat=k=>{const c=IMP_CATS.find(x=>x.k===k);return c?(LANG==='he'?c.he:c.en):k};
+const imMax=n=>Math.max(1,Math.floor((n-1)/2));
+function imShow(v){show('menu',false);show('mm',false);show('game',false);show('imp');IMV.forEach(x=>show(x,x===v));$('immsg').textContent=''}
+function imMsg(t,bad){$('immsg').className='msg'+(bad?' bad':'');$('immsg').textContent=t||''}
+function imStop(){clearInterval(IM.poll);IM.poll=null}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+/* a card is only visible while a finger is held on it */
+function imHold(el,onRelease){
+  const open=e=>{e.preventDefault();el.classList.add('open');SFX.play('key',2)},close=()=>{if(!el.classList.contains('open'))return;el.classList.remove('open');onRelease&&onRelease()};
+  el.onpointerdown=open;el.onpointerup=close;el.onpointerleave=close;el.onpointercancel=close;el.oncontextmenu=e=>e.preventDefault();
+  el.onkeydown=e=>{if(e.key===' '||e.key==='Enter')open(e)};el.onkeyup=close;el.tabIndex=0;
+}
+window.impPeek=on=>{const el=document.querySelector('#imp .imhold');if(!el)return '';if(on){el.classList.add('open');return el.querySelector('.face').textContent}el.dispatchEvent(new Event('pointerup'));return ''};
+function imCardHTML(c){
+  return '<div class="imhold" id="imholdel"><div class="cover"><big>👆</big>'+tr('Hold here to see your card','החזיקו כאן כדי לראות את הכרטיס')+'</div><div class="face">'+
+    (c.imp?'<div class="imimp">'+tr('Imposter','מתחזה')+'</div>'+(c.category?'<div class="imsmall">'+tr('Hint: ','רמז: ')+esc(imCat(c.category))+'</div>':'<div class="imsmall">'+tr('No hint this time. Listen carefully!','בלי רמז הפעם. הקשיבו טוב!')+'</div>')
+      :'<div class="imsmall">'+tr('The secret word','המילה הסודית')+'</div><div class="imword">'+esc(c.word)+'</div><div class="imsmall">'+esc(imCat(c.category))+'</div>')+'</div></div>';
+}
+function imMarkBad(c){const el=$('imholdel');if(el&&c.imp)el.classList.add('bad')}
+
+/* ================= one phone, passed around ================= */
+function impLocal(){
+  imStop();mode='imp';
+  const names=(()=>{try{return JSON.parse(st('lr-imp-names')||'[]')}catch(e){return []}})();
+  const cats=(()=>{try{return JSON.parse(st('lr-imp-cats')||'null')}catch(e){return null}})()||IMP_CATS.map(c=>c.k);
+  IM={mode:'local',names,imps:+st('lr-imp-n')||1,hint:st('lr-imp-hint')!=='0',cats:new Set(cats),scores:IM.scores||{}};
+  imSetup();
+}
+function imSave(){sv('lr-imp-names',JSON.stringify(IM.names));sv('lr-imp-n',IM.imps);sv('lr-imp-hint',IM.hint?'1':'0');sv('lr-imp-cats',JSON.stringify([...IM.cats]))}
+function imSettingsHTML(n){
+  IM.imps=Math.min(IM.imps,imMax(Math.max(3,n)));
+  return '<div class="imrow"><span>'+tr('Imposters','מתחזים')+'</span><span class="imstep"><button class="alt" id="imMinus">−</button><b id="imN">'+IM.imps+'</b><button class="alt" id="imPlus">+</button></span></div>'+
+    '<div class="imrow"><span>'+tr('Hint for imposters (the category)','רמז למתחזים (הקטגוריה)')+'</span><button class="imtog'+(IM.hint?'':' off')+'" id="imHint">'+(IM.hint?tr('On','פועל'):tr('Off','כבוי'))+'</button></div>'+
+    '<div class="whsec">'+tr('Categories','קטגוריות')+'</div><div class="imcats">'+IMP_CATS.map(c=>'<button data-k="'+c.k+'" class="'+(IM.cats.has(c.k)?'on':'')+'">'+esc(LANG==='he'?c.he:c.en)+'</button>').join('')+'</div>';
+}
+function imSettingsWire(n,redraw){
+  $('imMinus').onclick=()=>{IM.imps=Math.max(1,IM.imps-1);redraw()};
+  $('imPlus').onclick=()=>{IM.imps=Math.min(imMax(Math.max(3,n)),IM.imps+1);redraw()};
+  $('imHint').onclick=()=>{IM.hint=!IM.hint;redraw()};
+  document.querySelectorAll('.imcats button').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(IM.cats.has(k)){if(IM.cats.size>1)IM.cats.delete(k)}else IM.cats.add(k);redraw()});
+}
+function imSetup(){
+  imShow('imsetup');const n=IM.names.length;
+  $('imsetup').innerHTML='<b>'+tr('Imposter · One phone','מתחזה · טלפון אחד')+'</b><p class="note">'+tr('Add everyone who is playing, then pass the phone around.','הוסיפו את כל המשתתפים והעבירו את הטלפון מיד ליד.')+'</p>'+
+    '<div class="row"><input id="imIn" type="text" maxlength="16" placeholder="'+tr('Player name','שם השחקן')+'" autocomplete="off"><button id="imAdd" class="alt" style="width:auto">'+tr('Add','הוספה')+'</button></div>'+
+    '<div class="imnames">'+IM.names.map((x,i)=>'<span class="imname">'+esc(x)+'<button data-i="'+i+'" aria-label="Remove">×</button></span>').join('')+'</div>'+
+    '<p class="note">'+n+' '+tr('players','שחקנים')+(n<3?' · '+tr('at least 3','לפחות 3'):'')+'</p>'+imSettingsHTML(n)+
+    '<button id="imGo"'+(n<3?' disabled':'')+'>'+tr('Deal the cards','חלוקת קלפים')+'</button><div class="links"><button id="imMenu">'+tr('Back to menu','חזרה לתפריט')+'</button></div>';
+  const add=()=>{const v=$('imIn').value.trim().slice(0,16);if(!v)return;if(IM.names.some(x=>x.toLowerCase()===v.toLowerCase())){imMsg(tr('That name is already in','השם הזה כבר ברשימה'),true);return}
+    if(IM.names.length>=20){imMsg(tr('Up to 20 players','עד 20 שחקנים'),true);return}IM.names.push(v);imSave();imSetup();setTimeout(()=>{try{$('imIn').focus()}catch(e){}},30)};
+  $('imAdd').onclick=add;$('imIn').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();add()}};
+  document.querySelectorAll('.imname button').forEach(b=>b.onclick=()=>{IM.names.splice(+b.dataset.i,1);imSave();imSetup()});
+  imSettingsWire(n,()=>{imSave();imSetup()});
+  $('imGo').onclick=()=>{imSave();imDeal()};$('imMenu').onclick=()=>goMenu();
+}
+function imDeal(){
+  const cats=[...IM.cats],cat=IMP_CATS.find(c=>c.k===cats[Math.floor(Math.random()*cats.length)]),pair=cat.w[Math.floor(Math.random()*cat.w.length)];
+  const word=LANG==='he'?pair[1]:pair[0],others=shuffle(cat.w.filter(x=>x!==pair)).slice(0,5).map(x=>LANG==='he'?x[1]:x[0]);
+  const order=IM.names.slice(),imps=new Set(shuffle(order).slice(0,IM.imps));
+  IM.round={word,cat:cat.k,imps,starter:order[Math.floor(Math.random()*order.length)],options:shuffle([word,...others]),votes:{},i:0};
+  imPass(0);
+}
+function imPass(i){
+  const R=IM.round,name=IM.names[i];imShow('imcard');R.i=i;
+  const c=R.imps.has(name)?{imp:true,category:IM.hint?R.cat:null}:{imp:false,word:R.word,category:R.cat};
+  $('imcard').innerHTML='<b>'+tr('Pass the phone to ','העבירו את הטלפון ל')+esc(name)+'</b><p class="note">'+tr('Only ','רק ')+esc(name)+tr(' looks. Hold to see, let go to hide.',' מסתכל/ת. החזיקו כדי לראות, עזבו כדי להסתיר.')+'</p>'+imCardHTML(c)+
+    '<button id="imNext" disabled>'+(i<IM.names.length-1?tr('Hidden. Next player','הוסתר. לשחקן הבא'):tr('Hidden. Everyone has seen','הוסתר. כולם ראו'))+'</button><div class="links"><button id="imQuit">'+tr('Stop the game','עצירת המשחק')+'</button></div>';
+  imMarkBad(c);imHold($('imholdel'),()=>{$('imNext').disabled=false});
+  $('imNext').onclick=()=>{SFX.play('whoosh');if(i<IM.names.length-1)imPass(i+1);else imTalk()};$('imQuit').onclick=()=>imSetup();
+}
+function imTalkHTML(starter){
+  return '<div class="imbig">🗣️ '+esc(starter)+tr(' starts!',' מתחיל/ה!')+'</div><p class="note" style="text-align:center">'+tr('Go around the circle. Each player says ONE word about the secret word. Imposters: blend in and figure out the word!','עוברים בסבב. כל שחקן אומר מילה אחת שקשורה למילה הסודית. מתחזים: תשתלבו ונסו לגלות את המילה!')+'</p>';
+}
+function imTalk(){
+  imShow('imtalk');SFX.play('crown');
+  $('imtalk').innerHTML=imTalkHTML(IM.round.starter)+'<button id="imVoteGo">'+tr('Start voting','מתחילים להצביע')+'</button><div class="links"><button id="imAgainCard">'+tr('Forgot your card? Check again','שכחתם? בדקו שוב')+'</button></div>';
+  $('imVoteGo').onclick=()=>imVoter(0);
+  $('imAgainCard').onclick=()=>{imShow('imtalk');$('imtalk').innerHTML='<b>'+tr('Who are you?','מי אתם?')+'</b><div class="implist">'+IM.names.map((x,i)=>'<button class="p alt" data-i="'+i+'">'+esc(x)+'</button>').join('')+'</div>';
+    document.querySelectorAll('#imtalk .implist button').forEach(b=>b.onclick=()=>imRecheck(+b.dataset.i))};
+}
+function imRecheck(i){
+  const R=IM.round,name=IM.names[i],c=R.imps.has(name)?{imp:true,category:IM.hint?R.cat:null}:{imp:false,word:R.word,category:R.cat};
+  imShow('imcard');$('imcard').innerHTML='<b>'+esc(name)+'</b>'+imCardHTML(c)+'<button id="imNext" disabled>'+tr('Hidden. Back','הוסתר. חזרה')+'</button>';
+  imMarkBad(c);imHold($('imholdel'),()=>{$('imNext').disabled=false});$('imNext').onclick=()=>imTalk();
+}
+function imVoter(i){
+  const name=IM.names[i];imShow('imvote');
+  $('imvote').innerHTML='<b>'+tr('Pass the phone to ','העבירו את הטלפון ל')+esc(name)+'</b><p class="note">'+tr('Vote in secret: who is the imposter?','הצבעה סודית: מי המתחזה?')+'</p>'+
+    '<div class="implist">'+IM.names.map((x,k)=>k===i?'':'<button class="p alt" data-i="'+k+'">'+esc(x)+'</button>').join('')+'</div>';
+  document.querySelectorAll('#imvote .implist button').forEach(b=>b.onclick=()=>{IM.round.votes[name]=IM.names[+b.dataset.i];SFX.play('click');if(i<IM.names.length-1)imVoter(i+1);else imLocalTally()});
+}
+/* same rule as the server: the top-voted players are caught, but a tie at the cut-off protects everyone tied */
+function imCaught(names,votes,k){
+  const n=names.map(x=>[x,Object.values(votes).filter(v=>v===x).length]).sort((a,b)=>b[1]-a[1]);
+  const cut=n[k]?n[k][1]:0;return n.slice(0,k).filter(x=>x[1]>cut&&x[1]>0).map(x=>x[0]);
+}
+function imLocalTally(){
+  const R=IM.round;R.caught=imCaught(IM.names,R.votes,IM.imps);
+  const got=R.caught.filter(x=>R.imps.has(x));
+  if(!got.length){imLocalEnd('imp');return}
+  imShow('imguess');SFX.play('crown');
+  $('imguess').innerHTML='<div class="imbig imp">'+got.map(esc).join(', ')+tr(' was an imposter!',' היה/הייתה מתחזה!')+'</div><p class="note" style="text-align:center">'+tr('Last chance, imposters: guess the secret word to steal the win.','הזדמנות אחרונה למתחזים: נחשו את המילה הסודית וגנבו את הניצחון.')+'</p>'+
+    '<div class="imopts">'+R.options.map((w,i)=>'<button class="alt" data-i="'+i+'">'+esc(w)+'</button>').join('')+'</div>';
+  document.querySelectorAll('#imguess .imopts button').forEach(b=>b.onclick=()=>{R.guess=R.options[+b.dataset.i];imLocalEnd(R.guess===R.word?'imp':'crew')});
+}
+function imLocalEnd(win){
+  const R=IM.round;IM.names.forEach(x=>{IM.scores[x]=(IM.scores[x]||0)+(win==='imp'&&R.imps.has(x)?2:win==='crew'&&!R.imps.has(x)?1:0)});
+  const rows=IM.names.map(x=>({name:x,imp:R.imps.has(x),votes:Object.values(R.votes).filter(v=>v===x).length,score:IM.scores[x]}));
+  imDone(win,R.word,R.cat,R.guess,rows,R.caught);
+  $('imdone').insertAdjacentHTML('beforeend','<button id="imAgain">'+tr('Play again','סיבוב נוסף')+'</button><button class="alt" id="imPlayers">'+tr('Change players','שינוי שחקנים')+'</button><div class="links"><button id="imMenu">'+tr('Back to menu','חזרה לתפריט')+'</button></div>');
+  $('imAgain').onclick=()=>imDeal();$('imPlayers').onclick=()=>imSetup();$('imMenu').onclick=()=>goMenu();
+}
+function imDone(win,word,cat,guess,rows,caught){
+  imShow('imdone');
+  $('imdone').innerHTML='<div class="imbig '+(win==='imp'?'imp':'crew')+'">'+(win==='imp'?tr('Imposters win!','המתחזים ניצחו!'):tr('Crew wins!','הצוות ניצח!'))+'</div>'+
+    '<p class="note" style="text-align:center">'+tr('The word was ','המילה הייתה ')+'<b>'+esc(word)+'</b> · '+esc(imCat(cat))+'</p>'+
+    (guess!=null&&guess!==undefined?'<p class="msg">'+tr('The imposters guessed ','המתחזים ניחשו ')+'“'+esc(guess)+'”'+(guess===word?' ✅':' ❌')+'</p>':'')+
+    (caught&&!caught.length?'<p class="msg">'+tr('Nobody was caught','אף אחד לא נתפס')+'</p>':'')+
+    '<div class="implist">'+rows.map(r=>'<div class="p"><span>'+esc(r.name)+' <small>· '+(r.votes===1?tr('1 vote','קול אחד'):r.votes+' '+tr('votes','קולות'))+' · '+r.score+' '+(r.score===1?tr('pt','נק׳'):tr('pts','נק׳'))+'</small></span><span class="tag'+(r.imp?' imp':'')+'">'+(r.imp?tr('Imposter','מתחזה'):tr('Crew','צוות'))+'</span></div>').join('')+'</div>';
+  whCheer(win==='imp'?'You lose':'You win!');
+}
+
+/* ================= several phones: a room on the server ================= */
+function impOnline(){IMPGO=()=>imOnlineHome();MG='imp';mmOpen()}
+function imOnlineHome(msg){
+  imStop();imShow('imonl');mode='imp';
+  $('imonl').innerHTML='<b>'+tr('Imposter · Several phones','מתחזה · כמה טלפונים')+'</b><p class="note">'+tr('Everyone uses their own phone, in the same room. One player creates a room, the others scan the QR.','כל אחד בטלפון שלו, באותו חדר. שחקן אחד פותח חדר והשאר סורקים את הקוד.')+'</p>'+
+    '<button id="imCreate">'+tr('Create a room','פתיחת חדר')+'</button><div class="or">'+tr('or join one','או הצטרפו לחדר')+'</div>'+
+    '<div class="row"><input id="imCode" type="text" style="text-transform:uppercase;letter-spacing:4px" placeholder="CODE" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false"><button id="imJoin" class="alt" style="width:auto">'+tr('Join','הצטרפות')+'</button></div>'+
+    '<div class="links"><button id="imMenu">'+tr('Back to menu','חזרה לתפריט')+'</button></div>';
+  if(msg)imMsg(msg,true);
+  $('imCreate').onclick=async()=>{try{const r=await Net.impCreate();imEnter(r.code)}catch(e){imMsg(eMsg(e),true)}};
+  $('imJoin').onclick=()=>imJoin($('imCode').value);$('imCode').onkeydown=e=>{if(e.key==='Enter')imJoin($('imCode').value)};
+  $('imMenu').onclick=()=>goMenu();
+}
+async function imJoin(code){
+  code=String(code||'').trim().toUpperCase();if(!/^[A-Z2-9]{5}$/.test(code)){imMsg(tr('Codes have 5 letters','לקוד יש 5 תווים'),true);return}
+  try{const r=await Net.impJoin(code);if(r.lang&&r.lang!==LANG){try{localStorage.setItem('lr-lang',r.lang)}catch(e){}location.hash='#imp='+r.code;location.reload();return}imEnter(r.code)}
+  catch(e){imOnlineHome(eMsg(e))}
+}
+function imEnter(code){
+  imStop();IM={mode:'online',code,last:'',settings:null};
+  const tick=async()=>{try{const s=await Net.impState(code);if(IM.code!==code)return;imApply(s)}catch(e){if(IM.code!==code)return;imStop();imOnlineHome(eMsg(e))}};
+  tick();IM.poll=setInterval(tick,window.IMP_POLL||1500);
+}
+function imApply(s){
+  const key=JSON.stringify(s);if(key===IM.last)return;const prev=IM.s;IM.last=key;IM.s=s;
+  if(s.status==='closed'){imStop();imOnlineHome(tr('The host closed the room','המארח סגר את החדר'));return}
+  const host=s.me===s.host,me=s.players.find(p=>p.id===s.me);
+  if(!IM.settings||s.status==='lobby'&&!prev)IM.settings={imps:s.imposters||1,hint:s.hint,cats:new Set(s.cats&&s.cats.length?s.cats:IMP_CATS.map(c=>c.k))};
+  const statusChanged=!prev||prev.status!==s.status||prev.round!==s.round;
+  if(s.status==='lobby'){imRoom(s,host);return}
+  if(s.status==='reveal'){if(statusChanged)imOnlineCard(s,me);if(me.seen)imWaitSeen(s);return}
+  if(s.status==='talk'){if(statusChanged){SFX.play('crown');imOnlineTalk(s,host)}return}
+  if(s.status==='vote'){imOnlineVote(s,host,statusChanged);return}
+  if(s.status==='guess'){imOnlineGuess(s,statusChanged);return}
+  if(s.status==='done'){if(statusChanged)SFX.play('whoosh');imOnlineDone(s,host);return}
+}
+const imName=(s,id)=>{const p=s.players.find(x=>x.id===id);return p?p.name:'?'};
+function imRoom(s,host){
+  if(!$('imroom').classList.contains('hide')&&IM.roomDrawn===IM.last)return;IM.roomDrawn=IM.last;
+  imShow('imroom');const n=s.players.length,link=WEB+'game.html#imp='+s.code+'&l='+LANG;
+  IM.settings.imps=Math.min(IM.settings.imps,imMax(Math.max(3,n)));
+  $('imroom').innerHTML='<b>'+tr('Room code','קוד החדר')+'</b><div class="code">'+s.code+'</div><div class="qr" id="imQr"></div><p class="note" style="text-align:center">'+tr('Scan with any phone camera to join. No app needed.','סרקו עם המצלמה של כל טלפון כדי להצטרף. בלי אפליקציה.')+'</p>'+
+    '<button class="alt" id="imLink">'+tr('Copy link','העתקת קישור')+'</button>'+
+    '<div class="whsec">'+tr('Players','שחקנים')+' · '+n+'</div><div class="implist">'+s.players.map(p=>'<div class="p"><span>'+esc(p.name)+(p.id===s.host?' 👑':'')+(p.id===s.me?' <small>('+tr('you','אתם')+')</small>':'')+(p.score?' <small>· '+p.score+' '+tr('pts','נק׳')+'</small>':'')+'</span>'+
+      (host&&p.id!==s.me?'<button class="alt" style="width:auto;padding:4px 12px" data-k="'+p.id+'">×</button>':'')+'</div>').join('')+'</div>'+
+    (host?imSettingsOnline(n)+'<button id="imStart"'+(n<3?' disabled':'')+'>'+(n<3?tr('Waiting for at least 3 players','מחכים לפחות ל-3 שחקנים'):tr('Deal the cards','חלוקת קלפים'))+'</button>'
+         :'<p class="msg">'+tr('Waiting for the host to start…','מחכים שהמארח יתחיל…')+'</p>')+
+    '<div class="links"><button id="imLeave">'+(host?tr('Close the room','סגירת החדר'):tr('Leave','יציאה'))+'</button></div>';
+  qrInto($('imQr'),link);
+  $('imLink').onclick=()=>{try{navigator.clipboard.writeText(link).then(()=>{$('imLink').textContent=tr('Link copied','הקישור הועתק')},()=>{$('imLink').textContent=link})}catch(e){$('imLink').textContent=link}};
+  document.querySelectorAll('#imroom [data-k]').forEach(b=>b.onclick=()=>Net.impKick(s.code,b.dataset.k).catch(e=>imMsg(eMsg(e),true)));
+  if(host){imSettingsWireOnline(n,()=>{IM.roomDrawn=null;imRoom(IM.s,true)});$('imStart').onclick=imStartRound}
+  $('imLeave').onclick=imLeave;
+}
+function imSettingsOnline(n){const save=IM.imps,saveH=IM.hint,saveC=IM.cats;IM.imps=IM.settings.imps;IM.hint=IM.settings.hint;IM.cats=IM.settings.cats;const x=imSettingsHTML(n);IM.settings.imps=IM.imps;IM.imps=save;IM.hint=saveH;IM.cats=saveC;return x}
+function imSettingsWireOnline(n,redraw){
+  const S=IM.settings;
+  $('imMinus').onclick=()=>{S.imps=Math.max(1,S.imps-1);redraw()};
+  $('imPlus').onclick=()=>{S.imps=Math.min(imMax(Math.max(3,n)),S.imps+1);redraw()};
+  $('imHint').onclick=()=>{S.hint=!S.hint;redraw()};
+  document.querySelectorAll('.imcats button').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(S.cats.has(k)){if(S.cats.size>1)S.cats.delete(k)}else S.cats.add(k);redraw()});
+}
+async function imStartRound(){const S=IM.settings;try{await Net.impStart(IM.code,S.imps,S.hint,[...S.cats]);IM.last=''}catch(e){imMsg(eMsg(e),true)}}
+async function imLeave(){const c=IM.code;imStop();IM.code=null;try{await Net.impLeave(c)}catch(e){}goMenu()}
+function imOnlineCard(s,me){
+  imShow('imcard');
+  $('imcard').innerHTML='<b>'+tr('Your card · round ','הכרטיס שלכם · סיבוב ')+s.round+'</b><p class="note">'+tr('Make sure nobody is looking at your screen.','ודאו שאף אחד לא מסתכל על המסך שלכם.')+'</p>'+imCardHTML(s.card)+
+    '<button id="imNext" disabled>'+tr('Got it','הבנתי')+'</button><p class="note" id="imWait" style="text-align:center"></p><div class="links"><button id="imLeave">'+tr('Leave','יציאה')+'</button></div>';
+  imMarkBad(s.card);imHold($('imholdel'),()=>{if(!IM.seenSent)$('imNext').disabled=false});
+  IM.seenSent=false;$('imNext').onclick=async()=>{IM.seenSent=true;$('imNext').disabled=true;try{await Net.impSeen(IM.code);IM.last=''}catch(e){imMsg(eMsg(e),true)}};
+  $('imLeave').onclick=imLeave;
+}
+function imWaitSeen(s){const k=s.players.filter(p=>p.seen).length;if($('imWait'))$('imWait').textContent=tr('Waiting for everyone: ','מחכים לכולם: ')+k+' / '+s.players.length;if($('imNext'))$('imNext').disabled=true}
+function imOnlineTalk(s,host){
+  imShow('imtalk');
+  $('imtalk').innerHTML=imTalkHTML(imName(s,s.starter))+imCardHTML(s.card)+
+    (host?'<button id="imVoteGo">'+tr('Start voting','מתחילים להצביע')+'</button>':'<p class="msg">'+tr('The host starts the vote when you’re done talking.','המארח יפתח את ההצבעה בסוף הסבב.')+'</p>')+
+    '<div class="links"><button id="imLeave">'+tr('Leave','יציאה')+'</button></div>';
+  imMarkBad(s.card);imHold($('imholdel'));
+  if(host)$('imVoteGo').onclick=async()=>{try{await Net.impNext(IM.code)}catch(e){imMsg(eMsg(e),true)}};
+  $('imLeave').onclick=imLeave;
+}
+function imOnlineVote(s,host,fresh){
+  const k=s.players.filter(p=>p.voted).length;
+  if(!fresh&&!$('imvote').classList.contains('hide')){$('imVoted').textContent=tr('Voted: ','הצביעו: ')+k+' / '+s.players.length;
+    document.querySelectorAll('#imvote .implist button').forEach(b=>{b.classList.toggle('on',b.dataset.k===s.my_vote)});return}
+  imShow('imvote');
+  $('imvote').innerHTML='<b>'+tr('Who is the imposter?','מי המתחזה?')+'</b><p class="note">'+tr('Your vote is secret until the end. You can change it until everyone has voted.','ההצבעה סודית עד הסוף. אפשר לשנות עד שכולם מצביעים.')+'</p>'+
+    '<div class="implist">'+s.players.filter(p=>p.id!==s.me).map(p=>'<button class="p alt'+(p.id===s.my_vote?' on':'')+'" data-k="'+p.id+'">'+esc(p.name)+'</button>').join('')+'</div>'+
+    '<p class="note" id="imVoted" style="text-align:center">'+tr('Voted: ','הצביעו: ')+k+' / '+s.players.length+'</p>'+
+    (host?'<button class="alt" id="imEndVote">'+tr('End voting now','סיום ההצבעה עכשיו')+'</button>':'');
+  document.querySelectorAll('#imvote .implist button').forEach(b=>b.onclick=async()=>{SFX.play('click');document.querySelectorAll('#imvote .implist button').forEach(x=>x.classList.toggle('on',x===b));try{await Net.impVote(IM.code,b.dataset.k)}catch(e){imMsg(eMsg(e),true)}});
+  if(host)$('imEndVote').onclick=async()=>{try{await Net.impNext(IM.code)}catch(e){imMsg(eMsg(e),true)}};
+}
+function imOnlineGuess(s,fresh){
+  if(!fresh)return;imShow('imguess');SFX.play('crown');
+  const got=s.players.filter(p=>p.imp).map(p=>p.name);
+  $('imguess').innerHTML='<div class="imbig imp">'+got.map(esc).join(', ')+tr(' was an imposter!',' היה/הייתה מתחזה!')+'</div>'+
+    (s.options?'<p class="note" style="text-align:center">'+tr('Last chance: guess the secret word to steal the win.','הזדמנות אחרונה: נחשו את המילה הסודית וגנבו את הניצחון.')+'</p><div class="imopts">'+s.options.map((w,i)=>'<button class="alt" data-i="'+i+'">'+esc(w)+'</button>').join('')+'</div>'
+      :'<p class="msg">'+tr('The imposters are guessing the word…','המתחזים מנחשים את המילה…')+'</p>');
+  if(s.options)document.querySelectorAll('#imguess .imopts button').forEach(b=>b.onclick=async()=>{try{await Net.impGuess(IM.code,s.options[+b.dataset.i])}catch(e){imMsg(eMsg(e),true)}});
+}
+function imOnlineDone(s,host){
+  const R=s.result,rows=s.players.map(p=>({name:p.name,imp:!!p.imp,votes:s.players.filter(x=>x.vote===p.id).length,score:p.score}));
+  imDone(R.winner,R.word,R.category,R.guess,rows,s.caught);
+  $('imdone').insertAdjacentHTML('beforeend',(host?'<button id="imAgain">'+tr('Next round','סיבוב נוסף')+'</button><button class="alt" id="imSet">'+tr('Change settings','שינוי הגדרות')+'</button>':'<p class="msg">'+tr('Waiting for the host to start the next round…','מחכים שהמארח יתחיל סיבוב נוסף…')+'</p>')+
+    '<div class="links"><button id="imLeave">'+(host?tr('Close the room','סגירת החדר'):tr('Leave','יציאה'))+'</button></div>');
+  if(host){$('imAgain').onclick=imStartRound;$('imSet').onclick=()=>{IM.roomDrawn=null;imRoom(s,true)}}
+  $('imLeave').onclick=imLeave;
+}
+
+if(IMPJ){IMPGO=()=>imJoin(IMPJ);MG='imp';mmOpen()}
+else if(typeof MODE!=='undefined'&&MODE==='imp-local')impLocal();
+else if(typeof MODE!=='undefined'&&MODE==='imp-online')impOnline();
+</script><script>
 /* ===== Game feel: tile pops, countdown, banner bumps, confetti. Presentation only. ===== */
 (function(){
   const $=id=>document.getElementById(id);
@@ -4107,7 +4402,7 @@ const SFX=(()=>{
     SFX.play(b.closest('#game')&&!b.closest('.links')?'click':'menu');
   },{capture:true});
   /* a whoosh whenever a new screen or panel slides in */
-  const SCREENS=new Set(['menu','solo','mm','game','wh','whpre','whplay','whres','hm','hmpre','hmplay','hmres','mmcfg','mmauth','mmlobby','mmwait','mmready','mmfriend','mmhostv','mmlbv','mmren','mmoutv']);
+  const SCREENS=new Set(['menu','solo','mm','game','imp','imsetup','imonl','imroom','imcard','imtalk','imvote','imguess','imdone','wh','whpre','whplay','whres','hm','hmpre','hmplay','hmres','mmcfg','mmauth','mmlobby','mmwait','mmready','mmfriend','mmhostv','mmlbv','mmren','mmoutv']);
   let wt=0;
   new MutationObserver(ms=>{
     for(const m of ms){const t=m.target;if(!SCREENS.has(t.id))continue;
@@ -4165,7 +4460,7 @@ const SFX=(()=>{
     'Server':'שרת','Save':'שמירה','Server settings':'הגדרות שרת','Pick a name and play':'בחרו שם ושחקו','Choose a username':'בחרו שם משתמש',
     'Let’s go!':'יאללה!','Continue with Google':'המשך עם Google','Use email and password':'כניסה עם אימייל וסיסמה','Email':'אימייל',
     'Password':'סיסמה','Username (new account)':'שם משתמש (חשבון חדש)','Sign in':'כניסה','Create account':'יצירת חשבון',
-    'Play ranked':'משחק מדורג','Play a friend':'שחקו עם חבר','Leaderboard':'טבלת מובילים','Save account with Google':'שמירת החשבון עם Google',
+    'Play ranked':'משחק מדורג','⚡ Quick match':'⚡ משחק מהיר','🤝 Play a friend':'🤝 שחקו עם חבר','Imposter':'מתחזה','Find who doesn’t know the word':'גלו מי לא יודע את המילה','One phone':'טלפון אחד','Pass one phone around':'מעבירים טלפון אחד','Several phones':'כמה טלפונים','Everyone on their own phone':'כל אחד בטלפון שלו','🕵️ You’re invited to Imposter!':'🕵️ הוזמנתם למשחק מתחזה!','Play a friend':'שחקו עם חבר','Leaderboard':'טבלת מובילים','Save account with Google':'שמירת החשבון עם Google',
     'Sign out':'התנתקות','Create room':'יצירת חדר','or join your friend’s room':'או הצטרפו לחדר של חבר','CODE':'קוד','Join':'הצטרפות',
     'Your room code':'קוד החדר שלכם','Copy code':'העתקת קוד','Copied':'הועתק','Copy link':'העתקת קישור','Link copied':'הקישור הועתק','Scan with any phone camera to play. No app needed.':'סרקו עם המצלמה של כל טלפון ושחקו. בלי להתקין כלום.','⚔️ You’ve been challenged!':'⚔️ הזמינו אתכם לקרב!','Pick a name and tap Let’s go.':'בחרו שם ולחצו יאללה!','Or scan to play in the browser, no app needed':'או סרקו ושחקו בדפדפן, בלי אפליקציה','Change username':'שינוי שם משתמש',
     'Sign out of a guest account?':'להתנתק מחשבון אורח?',

@@ -47,6 +47,7 @@ input:focus{outline:none;border-color:var(--acc)}
 .game{display:grid;grid-template-columns:60px 1fr;align-items:center;gap:16px;text-align:left;padding:22px 20px;border-radius:24px}
 .game svg{width:60px;height:60px}.game b{display:block;font-size:1.6rem;font-weight:700}.game small{display:block;font-weight:500;opacity:.9;font-size:1rem}
 #gRush{background:#5b4cf0;box-shadow:0 7px 0 #3a2db8;animation-delay:.15s}#gRush:active{box-shadow:0 1px 0 #3a2db8}
+#gImp{background:#d6336c;box-shadow:0 7px 0 #9c1f4c;animation-delay:.42s}#gImp:active{box-shadow:0 1px 0 #9c1f4c}#impLocal{background:#ff9f1c;box-shadow:0 6px 0 #c97800;animation-delay:.1s}#impLocal:active{box-shadow:0 1px 0 #c97800}#impOnline{background:#20b26c;box-shadow:0 6px 0 #13814c;animation-delay:.16s}#impOnline:active{box-shadow:0 1px 0 #13814c}
 #gHm{background:#e4572e;box-shadow:0 7px 0 #a83a19;animation-delay:.33s}#gHm:active{box-shadow:0 1px 0 #a83a19}
 #hmSolo{background:#ff6b4a;box-shadow:0 6px 0 #c94a2e;animation-delay:.1s}#hmSolo:active{box-shadow:0 1px 0 #c94a2e}#hmDaily{background:#9b51e0;box-shadow:0 6px 0 #6f2fb0;animation-delay:.16s}#hmDaily:active{box-shadow:0 1px 0 #6f2fb0}#hmBot{background:#2f9ee8;box-shadow:0 6px 0 #1b73b0;animation-delay:.19s}#hmBot:active{box-shadow:0 1px 0 #1b73b0}#hmLocal{background:#ff9f1c;box-shadow:0 6px 0 #c97800;animation-delay:.22s}#hmLocal:active{box-shadow:0 1px 0 #c97800}#hmOnline{background:#20b26c;box-shadow:0 6px 0 #13814c;animation-delay:.28s}#hmOnline:active{box-shadow:0 1px 0 #13814c}
 #gWh{background:#0fa3a3;box-shadow:0 7px 0 #087575;animation-delay:.24s}#gWh:active{box-shadow:0 1px 0 #087575}
@@ -68,7 +69,19 @@ input:focus{outline:none;border-color:var(--acc)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .langb{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);inset-inline-end:max(14px,env(safe-area-inset-right,0px));width:auto;z-index:5;padding:8px 14px;border-radius:14px;font-size:1rem;background:var(--card);color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);animation:none}
 .langb:active{box-shadow:0 0 0 var(--line)}.qr{background:#fff;border-radius:18px;padding:8px;width:min(230px,66vw);margin:4px auto 0;box-shadow:0 4px 0 var(--line,#ccd)}.qr svg{display:block;width:100%;height:auto}.qr svg rect[fill="white"],.qr svg path[fill="white"]{fill:#fff}
-.web .wifi{display:none!important}</style></head><body><button id="langb" class="langb" aria-label="Language">עב</button>
+.web .wifi{display:none!important}
+/* four games as a 2 x 2 grid */
+#home{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#home>*:not(.game){grid-column:1/-1}
+#home .game{grid-template-columns:1fr;justify-items:center;align-content:center;text-align:center;gap:8px;padding:18px 10px 16px;min-height:150px;border-radius:22px}
+#home .game svg{width:52px;height:52px}
+#home .game b{font-size:1.2rem;line-height:1.15}#home .game small{font-size:.8rem;line-height:1.25;opacity:.92}
+/* smaller mode buttons */
+.col{gap:10px}
+.mode{grid-template-columns:38px 1fr;gap:12px;padding:10px 14px;border-radius:18px}
+.mode svg{width:38px;height:38px}
+.mode b{font-size:1.1rem}.mode small{font-size:.82rem}
+</style></head><body><button id="langb" class="langb" aria-label="Language">עב</button>
 <main>
 <div class="logo" aria-label="Letter Rush" role="img"><div><span>L</span><span>E</span><span>T</span><span class="r">T</span><span>E</span><span>R</span></div><div><span>R</span><span>U</span><span class="r">S</span><span>H</span></div></div>
 <p class="tag">Think fast. Spell faster.</p>
@@ -77,6 +90,7 @@ input:focus{outline:none;border-color:var(--acc)}
   <button id="gRush" class="game"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="3" y="14" width="14" height="22" rx="4" fill="#fff" opacity=".55"/><rect x="19" y="14" width="14" height="22" rx="4" fill="#ffcf3a"/><rect x="35" y="14" width="14" height="22" rx="4" fill="#fff" opacity=".55"/></svg><span><b>Letter Rush</b><small>Fill the boxes before your rival does</small></span></button>
   <button id="gWh" class="game"><svg viewBox="0 0 52 52" aria-hidden="true"><g fill="#fff"><rect x="5" y="5" width="18" height="18" rx="5"/><rect x="29" y="5" width="18" height="18" rx="5" opacity=".55"/><rect x="5" y="29" width="18" height="18" rx="5" opacity=".55"/><rect x="29" y="29" width="18" height="18" rx="5"/></g><path d="M14 14L38 38" stroke="#1d1b4b" stroke-width="4" stroke-linecap="round" opacity=".55"/></svg><span><b>Word Hunt</b><small>Swipe words on a 4×4 board</small></span></button>
   <button id="gHm" class="game"><svg viewBox="0 0 52 52" aria-hidden="true"><path d="M8 48h24M14 48V6h26v6" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="40" cy="18" r="5" fill="none" stroke="#fff" stroke-width="3.5"/><path d="M40 23v12M40 27l-6 5M40 27l6 5M40 35l-5 8M40 35l5 8" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg><span><b>Hangman</b><small>Guess the word letter by letter</small></span></button>
+  <button id="gImp" class="game"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="19" r="11" fill="#fff" opacity=".3"/><path d="M8 46c2-10 9-15 18-15s16 5 18 15" fill="#fff" opacity=".3"/><path d="M13 19h26" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="19" r="4.5" fill="#1d1b4b"/><circle cx="32" cy="19" r="4.5" fill="#1d1b4b"/><path d="M21 28q5 3 10 0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/></svg><span><b>Imposter</b><small>Find who doesn’t know the word</small></span></button>
 </div>
 <div id="rushv" class="hide col"><p class="which">Letter Rush</p>
   <button id="single" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="28" r="17" fill="#fff" opacity=".25"/><circle cx="26" cy="28" r="15" fill="none" stroke="#fff" stroke-width="4"/><path d="M26 28V19M26 28l6 4" stroke="#fff" stroke-width="4" stroke-linecap="round"/><rect x="21" y="5" width="10" height="5" rx="2" fill="#fff"/></svg><span><b>Solo</b><small>Race the clock</small></span></button>
@@ -98,6 +112,10 @@ input:focus{outline:none;border-color:var(--acc)}
   <button id="hmLocal" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="13" y="4" width="26" height="44" rx="6" fill="#fff" opacity=".25"/><rect x="13" y="4" width="26" height="44" rx="6" fill="none" stroke="#fff" stroke-width="4"/><circle cx="21" cy="20" r="4" fill="#fff"/><circle cx="31" cy="32" r="4" fill="#fff"/></svg><span><b>2 Players</b><small>Pick a secret word for each other</small></span></button>
   <button id="hmOnline" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="20" fill="#fff" opacity=".25"/><circle cx="26" cy="26" r="20" fill="none" stroke="#fff" stroke-width="4"/><path d="M6 26h40M26 6c7 6 7 34 0 40M26 6c-7 6-7 34 0 40" fill="none" stroke="#fff" stroke-width="3.5"/></svg><span><b>Online</b><small>Ranked, friends &amp; leaderboard</small></span></button>
 </div>
+<div id="impv" class="hide col"><p class="which">Imposter</p>
+  <button id="impLocal" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="13" y="4" width="26" height="44" rx="6" fill="#fff" opacity=".25"/><rect x="13" y="4" width="26" height="44" rx="6" fill="none" stroke="#fff" stroke-width="4"/><circle cx="21" cy="20" r="4" fill="#fff"/><circle cx="31" cy="32" r="4" fill="#fff"/></svg><span><b>One phone</b><small>Pass one phone around</small></span></button>
+  <button id="impOnline" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="20" fill="#fff" opacity=".25"/><circle cx="26" cy="26" r="20" fill="none" stroke="#fff" stroke-width="4"/><path d="M6 26h40M26 6c7 6 7 34 0 40M26 6c-7 6-7 34 0 40" fill="none" stroke="#fff" stroke-width="3.5"/></svg><span><b>Several phones</b><small>Everyone on their own phone</small></span></button>
+</div>
 <div id="multiv" class="hide" style="display:flex;flex-direction:column;gap:14px">
   <button id="online">Play online</button>
   <p class="sec wifi">Same Wi-Fi, no internet needed</p>
@@ -106,7 +124,7 @@ input:focus{outline:none;border-color:var(--acc)}
 <div id="hostv" class="card hide"><p class="mute">Your friend taps Join. Your address:</p><p class="big" id="ip"></p><div class="qr hide" id="ipqr"></div><p class="mute hide" id="ipqrt">Or scan to play in the browser, no app needed</p><button id="open">Start game</button></div>
 <div id="joinv" class="card hide"><p class="mute">Looking for a game nearby<span class="dots"><span>.</span><span>.</span><span>.</span></span></p><input id="manual" placeholder="or type the host’s address" inputmode="decimal"><button id="go" class="alt">Join</button></div>
 <button id="back" class="link hide">Back</button>
-<p class="ver">Version 6.0</p>
+<p class="ver">Version 7.0</p>
 </main><script>
 
 const SFX=(()=>{
@@ -163,7 +181,7 @@ const SFX=(()=>{
 })();
 
 addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button');if(!b)return;SFX.play(b.id==='back'?'back':'menu')},{capture:true});
-(function(){let first=true;new MutationObserver(ms=>{for(const m of ms){const t=m.target;if(!['home','rushv','whv','hmv','multiv','hostv','joinv'].includes(t.id))continue;
+(function(){let first=true;new MutationObserver(ms=>{for(const m of ms){const t=m.target;if(!['home','rushv','whv','hmv','impv','multiv','hostv','joinv'].includes(t.id))continue;
   if(/\bhide\b/.test(m.oldValue||'')&&!t.classList.contains('hide')){if(t.id!=='home')SFX.play('whoosh');break}}})
   .observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class'],attributeOldValue:true});
   addEventListener('load',()=>setTimeout(()=>SFX.play('whoosh'),120));})();
@@ -171,7 +189,7 @@ addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('b
 try{const t=localStorage.getItem('lr-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}
 const $=id=>document.getElementById(id);let poll=null,cur='home';
 if(location.hash==='#err')$('err').classList.remove('hide');
-function view(v){cur=v;['home','rushv','whv','hmv','multiv','hostv','joinv'].forEach(x=>$(x).classList.toggle('hide',x!==v));$('back').classList.toggle('hide',v==='home');$('err').classList.add('hide')}
+function view(v){cur=v;['home','rushv','whv','hmv','impv','multiv','hostv','joinv'].forEach(x=>$(x).classList.toggle('hide',x!==v));$('back').classList.toggle('hide',v==='home');$('err').classList.add('hide')}
 function stop(){clearInterval(poll);try{Android.stop()}catch(e){}}
 function go(ip){stop();location.href='http://'+ip+':8080/'}
 $('single').onclick=()=>{SFX.play('whoosh');setTimeout(()=>{location.href='game.html#single'},200)};
@@ -184,13 +202,13 @@ $('join').onclick=()=>{view('joinv');try{Android.find()}catch(e){}poll=setInterv
 $('go').onclick=()=>{const v=$('manual').value.trim();if(v)go(v)};
 $('back').onclick=()=>{stop();view(cur==='multiv'?'rushv':(cur==='hostv'||cur==='joinv')?'multiv':'home')};
 function nav(u){try{SFX.play('whoosh')}catch(e){}setTimeout(()=>{location.href=u},200)}
-$('gRush').onclick=()=>view('rushv');$('gWh').onclick=()=>view('whv');$('gHm').onclick=()=>view('hmv');
+$('gRush').onclick=()=>view('rushv');$('gWh').onclick=()=>view('whv');$('gHm').onclick=()=>view('hmv');$('gImp').onclick=()=>view('impv');$('impLocal').onclick=()=>nav('game.html#imp-local');$('impOnline').onclick=()=>nav('game.html#imp-online');
 $('hmSolo').onclick=()=>nav('game.html#hm-solo');$('hmDaily').onclick=()=>nav('game.html#hm-daily');$('hmBot').onclick=()=>nav('game.html#hm-bot');$('hmLocal').onclick=()=>nav('game.html#hm-local');$('hmOnline').onclick=()=>nav('game.html#match-hm');
 $('rBot').onclick=()=>nav('game.html#bot');$('whBot').onclick=()=>nav('game.html#wh-bot');
 $('whSolo').onclick=()=>nav('game.html#wh-solo');$('whDaily').onclick=()=>nav('game.html#wh-daily');
 $('whLocal').onclick=()=>nav('game.html#wh-local');$('whOnline').onclick=()=>nav('game.html#match-wh');
-try{const g=sessionStorage.getItem('lr-view');if(g==='rushv'||g==='whv'||g==='hmv')view(g)}catch(e){}
-addEventListener('pagehide',()=>{try{sessionStorage.setItem('lr-view',cur==='whv'||cur==='hmv'?cur:(cur==='home'?'home':'rushv'))}catch(e){}});
+try{const g=sessionStorage.getItem('lr-view');if(g==='rushv'||g==='whv'||g==='hmv'||g==='impv')view(g)}catch(e){}
+addEventListener('pagehide',()=>{try{sessionStorage.setItem('lr-view',cur==='whv'||cur==='hmv'||cur==='impv'?cur:(cur==='home'?'home':'rushv'))}catch(e){}});
 </script><script>
 window.HE_OK=true;
 (function(){var he=false;try{he=localStorage.getItem('lr-lang')==='he'}catch(e){}
@@ -225,7 +243,7 @@ window.HE_OK=true;
     'Server':'שרת','Save':'שמירה','Server settings':'הגדרות שרת','Pick a name and play':'בחרו שם ושחקו','Choose a username':'בחרו שם משתמש',
     'Let’s go!':'יאללה!','Continue with Google':'המשך עם Google','Use email and password':'כניסה עם אימייל וסיסמה','Email':'אימייל',
     'Password':'סיסמה','Username (new account)':'שם משתמש (חשבון חדש)','Sign in':'כניסה','Create account':'יצירת חשבון',
-    'Play ranked':'משחק מדורג','Play a friend':'שחקו עם חבר','Leaderboard':'טבלת מובילים','Save account with Google':'שמירת החשבון עם Google',
+    'Play ranked':'משחק מדורג','⚡ Quick match':'⚡ משחק מהיר','🤝 Play a friend':'🤝 שחקו עם חבר','Imposter':'מתחזה','Find who doesn’t know the word':'גלו מי לא יודע את המילה','One phone':'טלפון אחד','Pass one phone around':'מעבירים טלפון אחד','Several phones':'כמה טלפונים','Everyone on their own phone':'כל אחד בטלפון שלו','🕵️ You’re invited to Imposter!':'🕵️ הוזמנתם למשחק מתחזה!','Play a friend':'שחקו עם חבר','Leaderboard':'טבלת מובילים','Save account with Google':'שמירת החשבון עם Google',
     'Sign out':'התנתקות','Create room':'יצירת חדר','or join your friend’s room':'או הצטרפו לחדר של חבר','CODE':'קוד','Join':'הצטרפות',
     'Your room code':'קוד החדר שלכם','Copy code':'העתקת קוד','Copied':'הועתק','Copy link':'העתקת קישור','Link copied':'הקישור הועתק','Scan with any phone camera to play. No app needed.':'סרקו עם המצלמה של כל טלפון ושחקו. בלי להתקין כלום.','⚔️ You’ve been challenged!':'⚔️ הזמינו אתכם לקרב!','Pick a name and tap Let’s go.':'בחרו שם ולחצו יאללה!','Or scan to play in the browser, no app needed':'או סרקו ושחקו בדפדפן, בלי אפליקציה','Change username':'שינוי שם משתמש',
     'Sign out of a guest account?':'להתנתק מחשבון אורח?',
