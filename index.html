@@ -3165,6 +3165,11 @@ hud2();setInterval(hud2,2000);
     d.onclick=function(e){if(e.target===d)d.remove()};
     draw();document.body.appendChild(d);
   }
+  // a light tap buzz on every button (respects the Vibration switch)
+  document.addEventListener('click',function(e){
+    var b=e.target&&e.target.closest&&e.target.closest('button,[role=button],.game,.chip');
+    if(b&&!b.disabled)try{navigator.vibrate(12)}catch(_){}
+  },true);
   window.lrSettings=open;
   // the back gesture closes an open sheet first (settings, store, a definition popup)
   var prev=window.lrBackGo;
