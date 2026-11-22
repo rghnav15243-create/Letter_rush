@@ -1,0 +1,11 @@
+{
+ "web": 100,
+ "minApk": 18,
+ "apk": 18,
+ "apkUrl": "LetterRush.apk",
+ "files": {
+  "launcher.html": "30d86e567a7522717fa1dc66d006fcfd06e231a3b89eb8eda127c2a55ab5a145",
+  "game.html": "74ad97580a2a2da625706f68bf12590cc183f924a2da8893f0b8263cc3637ee0",
+  "he_dict.js": "dd83761bd0ee2fc5848e5223f88f622a3f257fb43ed4aecd183429eb17714611"
+ }
+}

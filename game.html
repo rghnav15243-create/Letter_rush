@@ -297,8 +297,9 @@ b{font-weight:700}.card>b:first-child{font-size:1.2rem}
 #mmlobby .bigb{padding:20px 16px;font-size:1.35rem;border-radius:20px}
 #mmFriend.bigb{background:#20b26c;box-shadow:0 6px 0 #13814c}#mmFriend.bigb:active{box-shadow:0 1px 0 #13814c}
 #mmhostv .qr{width:min(200px,58vw)}
+#musb.off{opacity:.45}
 </style></head><body><main>
-<header><h1 class="logo" aria-label="Letter Rush"><span>L</span><span>E</span><span>T</span><span class="r">T</span><span>E</span><span>R</span><span class="sp"></span><span>R</span><span>U</span><span class="r">S</span><span>H</span></h1><div style="display:flex;gap:8px"><button class="ib" id="helpb" aria-label="How to play">?</button><button class="ib" id="snd" aria-label="Sound">🔊</button><button id="theme" aria-label="Light or dark">🌙</button></div></header>
+<header><h1 class="logo" aria-label="Letter Rush"><span>L</span><span>E</span><span>T</span><span class="r">T</span><span>E</span><span>R</span><span class="sp"></span><span>R</span><span>U</span><span class="r">S</span><span>H</span></h1><div style="display:flex;gap:8px"><button class="ib" id="helpb" aria-label="How to play">?</button><button id="musb" class="ib" aria-label="Music">🎵</button><button class="ib" id="snd" aria-label="Sound">🔊</button><button id="theme" aria-label="Light or dark">🌙</button></div></header>
 
 <section id="menu" class="stack">
   <div class="card hide" id="botcard"><b>Bot level</b><div id="botlv" style="margin-top:10px"></div></div>
@@ -2785,7 +2786,7 @@ const lenFor=r=>{if(mode==='single')return Math.min(3+Math.floor((r-1)/2),10);co
 /* helpers */
 function hash(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19}return h>>>0}
 function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-function beep(f){if(!snd)return;try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.frequency.value=f;g.gain.value=.08;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.12)}catch(e){}}
+function beep(f){if(!snd)return;try{SFX.play('blip',f)}catch(e){}}
 const show=(id,v=true)=>$(id).classList.toggle('hide',!v);
 function pick(){
   const f=w=>w.length===curN&&w[curHi]===letter.toLowerCase()&&!used.has(w);
@@ -4088,7 +4089,7 @@ function imSetup(){
   $('imGo').onclick=()=>{imSave();imDeal()};$('imMenu').onclick=()=>goMenu();
 }
 function imDeal(){
-  const cats=[...IM.cats],cat=IMP_CATS.find(c=>c.k===cats[Math.floor(Math.random()*cats.length)]),pair=cat.w[Math.floor(Math.random()*cat.w.length)];
+  const cats=[...IM.cats].filter(k=>IMP_CATS.some(c=>c.k===k)),key=cats.length?cats[Math.floor(Math.random()*cats.length)]:IMP_CATS[0].k,cat=IMP_CATS.find(c=>c.k===key),pair=cat.w[Math.floor(Math.random()*cat.w.length)];
   const word=LANG==='he'?pair[1]:pair[0],others=shuffle(cat.w.filter(x=>x!==pair)).slice(0,5).map(x=>LANG==='he'?x[1]:x[0]);
   const order=IM.names.slice(),imps=new Set(shuffle(order).slice(0,IM.imps));
   IM.round={word,cat:cat.k,imps,starter:order[Math.floor(Math.random()*order.length)],options:shuffle([word,...others]),votes:{},i:0};
@@ -4326,56 +4327,115 @@ else if(typeof MODE!=='undefined'&&MODE==='imp-online')impOnline();
 /* ===== Sound effects ===== */
 
 const SFX=(()=>{
-  let ac=null,master=null;
+  /* Letter Rush sound engine: everything is synthesized live (no audio files). Warm layered voices,
+     a small room reverb, and a gentle background music loop that can be switched off. */
+  let ac=null,master=null,fx=null,musBus=null,noiseBuf=null;
   const muted=()=>{try{if(typeof snd!=='undefined')return !snd}catch(e){}try{return localStorage.getItem('lr-snd')==='0'}catch(e){return false}};
+  const musicOn=()=>{try{return localStorage.getItem('lr-music')!=='0'}catch(e){return true}};
   function ctx(){
     if(ac)return ac;
     const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
-    try{ac=new C();const comp=ac.createDynamicsCompressor();master=ac.createGain();master.gain.value=.55;master.connect(comp);comp.connect(ac.destination)}catch(e){ac=null}
+    try{
+      ac=new C();const comp=ac.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=3;
+      master=ac.createGain();master.gain.value=.6;master.connect(comp);comp.connect(ac.destination);
+      // a small room: generated impulse response, mixed in quietly
+      const len=Math.floor(ac.sampleRate*1.3),ir=ac.createBuffer(2,len,ac.sampleRate);
+      for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3.2)}
+      const conv=ac.createConvolver();conv.buffer=ir;fx=ac.createGain();fx.gain.value=.22;fx.connect(conv);conv.connect(master);
+      musBus=ac.createGain();musBus.gain.value=0;musBus.connect(master);
+      const n=ac.sampleRate;noiseBuf=ac.createBuffer(1,n,ac.sampleRate);const nd=noiseBuf.getChannelData(0);for(let i=0;i<n;i++)nd[i]=Math.random()*2-1;
+    }catch(e){ac=null}
     return ac;
   }
-  const unlock=()=>{const a=ctx();if(a&&a.state==='suspended')a.resume().catch(()=>{})};
-  ['pointerdown','keydown','touchstart'].forEach(e=>addEventListener(e,unlock,{passive:true,capture:true}));
-  function tone(f,{t=0,d=.12,type='sine',v=.2,to=null,a=.005,vib=0}={}){
+  const out=(node,bus,wet)=>{node.connect(bus||master);if(wet&&fx){const w=ac.createGain();w.gain.value=wet;node.connect(w);w.connect(fx)}};
+  /* voices */
+  function osc(f,{t=0,d=.15,type='sine',v=.15,to=null,a=.004,det=0,bus=null,wet=.3,lp=0,pan=0}={}){
     const A=ctx();if(!A)return;const s=A.currentTime+t;
-    const o=A.createOscillator(),g=A.createGain();o.type=type;o.frequency.setValueAtTime(f,s);
+    const o=A.createOscillator(),g=A.createGain();o.type=type;o.frequency.setValueAtTime(f,s);o.detune.value=det;
     if(to)o.frequency.exponentialRampToValueAtTime(to,s+d);
-    if(vib){const l=A.createOscillator(),lg=A.createGain();l.frequency.value=vib;lg.gain.value=f*.03;l.connect(lg);lg.connect(o.frequency);l.start(s);l.stop(s+d+.05)}
     g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(v,s+a);g.gain.exponentialRampToValueAtTime(.0001,s+d);
-    o.connect(g);g.connect(master);o.start(s);o.stop(s+d+.05);
+    let last=g;o.connect(g);
+    if(lp){const f2=A.createBiquadFilter();f2.type='lowpass';f2.frequency.setValueAtTime(lp,s);f2.frequency.exponentialRampToValueAtTime(Math.max(200,lp/4),s+d);g.connect(f2);last=f2}
+    if(pan&&A.createStereoPanner){const p=A.createStereoPanner();p.pan.value=pan;last.connect(p);last=p}
+    out(last,bus,wet);o.start(s);o.stop(s+d+.05);
   }
-  function noise({t=0,d=.15,v=.12,f=1200,q=.8,to=null}={}){
-    const A=ctx();if(!A)return;const s=A.currentTime+t,n=Math.floor(A.sampleRate*d);
-    const b=A.createBuffer(1,n,A.sampleRate),ch=b.getChannelData(0);for(let i=0;i<n;i++)ch[i]=Math.random()*2-1;
-    const src=A.createBufferSource(),bp=A.createBiquadFilter(),g=A.createGain();src.buffer=b;bp.type='bandpass';bp.frequency.setValueAtTime(f,s);bp.Q.value=q;
+  // mallet: a soft sine with a quiet overtone and a quick click on the attack
+  function mallet(f,o={}){const v=o.v||.12;osc(f,Object.assign({},o,{v}));osc(f*2,Object.assign({},o,{v:v*.25,d:(o.d||.3)*.5}));osc(f*4.01,Object.assign({},o,{v:v*.08,d:.05}))}
+  // bell: inharmonic partials, long ring
+  function bell(f,o={}){const v=o.v||.08,d=o.d||.9;[[1,1],[2.76,.35],[5.4,.12],[8.93,.05]].forEach(([m,a])=>osc(f*m,Object.assign({},o,{v:v*a,d:d/(m>2?1.8:1),wet:.45})))}
+  // pluck: two detuned saws through a closing filter
+  function pluck(f,o={}){const v=o.v||.07;osc(f,Object.assign({type:'sawtooth',lp:3200,wet:.25},o,{v,det:-6}));osc(f,Object.assign({type:'sawtooth',lp:3200,wet:.25},o,{v,det:6}))}
+  function noise({t=0,d=.15,v=.1,f=1200,q=.8,to=null,type='bandpass',bus=null,wet=.15,pan=0,pto=null}={}){
+    const A=ctx();if(!A)return;const s=A.currentTime+t;
+    const src=A.createBufferSource(),bp=A.createBiquadFilter(),g=A.createGain();src.buffer=noiseBuf;bp.type=type;bp.frequency.setValueAtTime(f,s);bp.Q.value=q;
     if(to)bp.frequency.exponentialRampToValueAtTime(to,s+d);
-    g.gain.setValueAtTime(v,s);g.gain.exponentialRampToValueAtTime(.0001,s+d);src.connect(bp);bp.connect(g);g.connect(master);src.start(s);src.stop(s+d+.02);
+    g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(v,s+Math.min(.02,d/4));g.gain.exponentialRampToValueAtTime(.0001,s+d);
+    src.connect(bp);bp.connect(g);let last=g;
+    if(A.createStereoPanner&&(pan||pto!=null)){const p=A.createStereoPanner();p.pan.setValueAtTime(pan,s);if(pto!=null)p.pan.linearRampToValueAtTime(pto,s+d);g.connect(p);last=p}
+    out(last,bus,wet);src.start(s,Math.random()*.5);src.stop(s+d+.02);
   }
-  const N={C5:523.25,D5:587.33,E5:659.25,G5:783.99,A5:880,C6:1046.5,E6:1318.5,G6:1568};
+  const m2f=m=>440*Math.pow(2,(m-69)/12);
   const S={
-    click(){tone(620,{d:.05,type:'square',v:.05,to:900});noise({d:.03,v:.03,f:3000})},
-    key(i=0){tone(520+i*55,{d:.06,type:'triangle',v:.09,to:620+i*55})},
-    drop(i=0){tone(260+i*35,{t:i*.045,d:.07,v:.07,to:200+i*35})},
-    count(){tone(440,{d:.16,type:'square',v:.07});tone(220,{d:.18,v:.12})},
-    go(){[N.C5,N.E5,N.G5,N.C6].forEach((f,i)=>tone(f,{t:i*.05,d:.16,type:'square',v:.06}));noise({d:.35,v:.08,f:600,to:5000})},
-    correct(){[N.C5,N.E5,N.G5,N.C6].forEach((f,i)=>tone(f,{t:i*.06,d:.18,type:'triangle',v:.13}));tone(N.E6,{t:.26,d:.4,v:.05});tone(N.G6,{t:.3,d:.4,v:.04})},
-    crown(){tone(N.E6,{t:.32,d:.7,v:.07});tone(N.C6*1.5,{t:.36,d:.6,v:.05});noise({t:.32,d:.25,v:.04,f:7000})},
-    opp(){[N.G5,N.E5,N.C5].forEach((f,i)=>tone(f,{t:i*.07,d:.16,type:'triangle',v:.09}))},
-    wrong(){tone(190,{d:.12,type:'sawtooth',v:.09,to:140});tone(190,{t:.13,d:.16,type:'sawtooth',v:.09,to:110})},
-    timeup(){tone(440,{d:.5,type:'triangle',v:.14,to:200});noise({d:.4,v:.05,f:800,to:200})},
-    hint(){tone(600,{d:.35,v:.08,to:1500});[N.C6,N.E6,N.G6].forEach((f,i)=>tone(f,{t:.12+i*.07,d:.25,v:.04}))},
-    found(){[N.G5,N.C6].forEach((f,i)=>tone(f,{t:i*.09,d:.25,type:'triangle',v:.12}));noise({d:.2,v:.05,f:4000})},
-    tick(){tone(1100,{d:.03,type:'square',v:.035})},
-    win(){const m=[[N.C5,0],[N.E5,.12],[N.G5,.24],[N.C6,.36],[N.G5,.52],[N.C6,.64]];m.forEach(([f,t])=>tone(f,{t,d:.2,type:'square',v:.06}));
-      [N.C5,N.E5,N.G5,N.C6].forEach(f=>tone(f,{t:.82,d:1.1,type:'triangle',v:.08}));noise({t:.8,d:.6,v:.05,f:6000})},
-    lose(){[392,370,349,330].forEach((f,i)=>tone(f,{t:i*.28,d:i===3?.8:.3,type:'triangle',v:.13,vib:i===3?6:0}))},
-    draw(){tone(N.E5,{d:.3,type:'triangle',v:.1});tone(N.G5,{t:.15,d:.4,type:'triangle',v:.1})},
-    menu(){tone(480,{d:.09,v:.16,to:880});tone(960,{t:.025,d:.06,type:'triangle',v:.05})},
-    select(){tone(N.A5,{d:.07,type:'triangle',v:.1});tone(N.E6,{t:.05,d:.12,type:'triangle',v:.07})},
-    whoosh(){noise({d:.32,v:.16,f:350,q:1.2,to:3600});tone(180,{d:.28,v:.05,to:420})},
-    back(){noise({d:.3,v:.15,f:3200,q:1.2,to:300});tone(380,{d:.26,v:.05,to:150})}
+    click(){mallet(m2f(84),{d:.08,v:.07,wet:.1});noise({d:.025,v:.03,f:5000,q:2})},
+    key(i=0){const sc=[72,74,76,79,81,84,86,88,91];mallet(m2f(sc[Math.abs(i)%sc.length]),{d:.18,v:.09})},
+    drop(i=0){osc(m2f(55-i),{t:i*.04,d:.22,type:'sine',v:.14,to:m2f(48-i),wet:.1});noise({t:i*.04,d:.06,v:.03,f:900})},
+    count(){bell(m2f(69),{d:.5,v:.09});osc(m2f(45),{d:.25,v:.12,wet:.1})},
+    go(){[72,76,79,84].forEach((m,i)=>pluck(m2f(m),{t:i*.045,d:.3,v:.05}));bell(m2f(96),{t:.18,d:1.1,v:.05});noise({d:.4,v:.07,f:500,to:7000,pan:-.6,pto:.6})},
+    correct(){[72,76,79,84].forEach((m,i)=>mallet(m2f(m),{t:i*.055,d:.35,v:.11}));bell(m2f(88),{t:.24,d:1,v:.05});bell(m2f(91),{t:.3,d:1,v:.04})},
+    crown(){bell(m2f(96),{t:.3,d:1.4,v:.07});bell(m2f(100),{t:.36,d:1.3,v:.05});noise({t:.3,d:.35,v:.035,f:9000,q:3})},
+    opp(){[79,76,72].forEach((m,i)=>mallet(m2f(m),{t:i*.07,d:.25,v:.08}))},
+    wrong(){osc(m2f(50),{d:.18,type:'triangle',v:.13,to:m2f(46),lp:1400,wet:.1});osc(m2f(49),{t:.14,d:.28,type:'triangle',v:.13,to:m2f(42),lp:1200,wet:.15});noise({d:.08,v:.04,f:400})},
+    timeup(){[67,64,60].forEach((m,i)=>bell(m2f(m),{t:i*.16,d:.8,v:.08}));noise({d:.5,v:.04,f:900,to:200})},
+    hint(){osc(600,{d:.35,v:.06,to:1500,wet:.4});[84,88,91].forEach((m,i)=>bell(m2f(m),{t:.12+i*.07,d:.6,v:.04}))},
+    found(){[79,84].forEach((m,i)=>mallet(m2f(m),{t:i*.08,d:.35,v:.11}));noise({d:.18,v:.04,f:6000,q:2})},
+    tick(){mallet(m2f(96),{d:.04,v:.04,wet:.05})},
+    win(){[[72,0],[76,.12],[79,.24],[84,.36],[79,.52],[84,.64]].forEach(([m,t])=>pluck(m2f(m),{t,d:.28,v:.05}));
+      [60,64,67,72].forEach(m=>osc(m2f(m),{t:.82,d:1.6,type:'triangle',v:.06,a:.05,wet:.5}));[96,100,103].forEach((m,i)=>bell(m2f(m),{t:.85+i*.08,d:1.4,v:.04}));noise({t:.8,d:.7,v:.04,f:7000,q:2,pan:-.5,pto:.5})},
+    lose(){[67,66,65,64].forEach((m,i)=>osc(m2f(m),{t:i*.28,d:i===3?1:.32,type:'triangle',v:.12,lp:2200,wet:.35}))},
+    draw(){mallet(m2f(76),{d:.4,v:.09});mallet(m2f(79),{t:.15,d:.5,v:.09})},
+    menu(){mallet(m2f(79),{d:.14,v:.1});mallet(m2f(86),{t:.035,d:.12,v:.05})},
+    select(){mallet(m2f(81),{d:.12,v:.1});bell(m2f(88),{t:.05,d:.5,v:.04})},
+    whoosh(){noise({d:.34,v:.14,f:300,q:1.1,to:4200,pan:-.8,pto:.8});osc(160,{d:.3,v:.04,to:440,wet:.2})},
+    back(){noise({d:.32,v:.13,f:3600,q:1.1,to:280,pan:.8,pto:-.8});osc(420,{d:.28,v:.04,to:160,wet:.2})},
+    blip(f=660){mallet(f,{d:.16,v:.09})}
   };
-  return {play(n,a){if(muted()||!S[n])return;try{if(!ctx())return;unlock();S[n](a)}catch(e){}}};
+  /* ---- background music: a calm loop, made up as it plays ---- */
+  const BPM=96,STEP=60/BPM/2;
+  const PROG=[[48,52,55],[45,48,52],[41,45,48],[43,47,50],[41,45,48],[43,47,50],[40,43,47],[45,48,52]];
+  const PAT=[[0,1,2,1,0,1,2,1],[0,2,1,2,0,2,1,2],[2,1,0,1,2,1,0,-1],[0,-1,1,2,-1,2,1,0]];
+  let mOn=false,mTimer=null,next=0,step=0,pat=0;
+  function schedule(){
+    const A=ctx();if(!A||!mOn)return;
+    while(next<A.currentTime+.35){
+      const t=next-A.currentTime,bar=Math.floor(step/8)%PROG.length,s=step%8,ch=PROG[bar],big=Math.floor(step/8)%16;
+      if(s===0){pat=Math.floor(Math.random()*PAT.length);
+        ch.forEach(m=>{osc(m2f(m+12),{t,d:STEP*8.2,type:'triangle',v:.05,a:.35,lp:1400,bus:musBus,wet:.5,det:-7});osc(m2f(m+12),{t,d:STEP*8.2,type:'triangle',v:.04,a:.4,lp:1400,bus:musBus,wet:.5,det:7})})}
+      if(s===0||s===4){osc(m2f(ch[0]-12),{t,d:STEP*3.5,type:'triangle',v:.16,a:.01,lp:600,bus:musBus,wet:.05});osc(m2f(ch[0]-12),{t,d:STEP*3.5,type:'sine',v:.12,bus:musBus,wet:0})}
+      const n=PAT[pat][s];if(n>=0&&Math.random()>.12)bell(m2f(ch[n]+24),{t,d:.7,v:.035,bus:musBus});
+      if(big<14){
+        if(s===0||s===4)osc(150,{t,d:.22,type:'sine',v:.22,to:45,bus:musBus,wet:0});
+        if(s%2===1)noise({t,d:.04,v:.025,f:8000,type:'highpass',bus:musBus,wet:0});
+        if((s===2||s===6)&&big>=2)noise({t,d:.12,v:.035,f:1900,q:.9,bus:musBus,wet:.2});
+      }
+      next+=STEP;step++;
+    }
+  }
+  function musicStart(){
+    const A=ctx();if(!A||mOn||!musicOn()||document.hidden)return;
+    mOn=true;next=A.currentTime+.1;step=0;
+    musBus.gain.cancelScheduledValues(A.currentTime);musBus.gain.setValueAtTime(0,A.currentTime);musBus.gain.linearRampToValueAtTime(.5,A.currentTime+2.5);
+    clearInterval(mTimer);mTimer=setInterval(schedule,90);schedule();
+  }
+  function musicStop(){mOn=false;clearInterval(mTimer);if(ac&&musBus){musBus.gain.cancelScheduledValues(ac.currentTime);musBus.gain.setValueAtTime(musBus.gain.value,ac.currentTime);musBus.gain.linearRampToValueAtTime(0,ac.currentTime+.4)}}
+  const unlock=()=>{const a=ctx();if(a&&a.state==='suspended')a.resume().catch(()=>{});if(musicOn())musicStart()};
+  ['pointerdown','keydown','touchstart'].forEach(e=>addEventListener(e,unlock,{passive:true,capture:true}));
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)musicStop();else if(musicOn()&&ac&&ac.state!=='suspended')musicStart()});
+  return {
+    play(n,a){if(muted()||!S[n])return;try{if(!ctx())return;if(ac.state==='suspended')ac.resume().catch(()=>{});S[n](a)}catch(e){}},
+    music(on){try{localStorage.setItem('lr-music',on?'1':'0')}catch(e){}if(on){ctx();if(ac&&ac.state==='suspended')ac.resume().catch(()=>{});musicStart()}else musicStop()},
+    musicOn,
+    playing:()=>mOn
+  };
 })();
 
 (function(){
@@ -4589,4 +4649,175 @@ const SFX=(()=>{
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
 
+</script><script>
+/* Letter Rush: achievements, levels, looks unlocked in the Secret Lab, the back button, and the app's "page is alive" signal.
+   Shared by the main menu and the game page. Everything is stored on the phone (localStorage). */
+(function(){
+  var HE=false;try{HE=localStorage.getItem('lr-lang')==='he'}catch(e){}
+  function T(e,h){return HE?h:e}
+  function L(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function S(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function J(k,d){try{var v=JSON.parse(L(k));return v==null?d:v}catch(e){return d}}
+  function both(k){return Math.max(+L(k)||0,+L(k+'-he')||0)}
+  function anyKey(p){try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(p)===0)return true}}catch(e){}return false}
+  function maxKey(p){var m=0;try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(p)===0)m=Math.max(m,+localStorage.getItem(k)||0)}}catch(e){}return m}
+  function botWins(g){var w=0;['','-he'].forEach(function(s){var r=J('lr-bot-'+g+'-3'+s,null);if(r)w+=r[0]||0});return w}
+  function streak(){var m=0;['lr-ds','lr-ds-he'].forEach(function(k){var s=J(k,null);if(s&&s.n)m=Math.max(m,s.n)});return m}
+  function F(){return J('lr-achf',{})}
+  function flag(f){var x=F();return !!x[f]}
+
+  // level n needs 100+200+...+100(n-1) XP
+  function xp(){return +L('lr-xp')||0}
+  function level(x){x=x==null?xp():x;var n=1;while(x>=50*n*(n+1))n++;return n}
+  function levelRange(n){return [50*(n-1)*n,50*n*(n+1)]}
+
+  var A=[
+    ['first','🎮','First steps','צעד ראשון','Play any game','שחקו במשחק כלשהו',function(){var f=F();return f.p_rush||f.p_wh||f.p_hm||f.p_imp}],
+    ['all4','🧭','Explorer','מגלה עולמות','Play all four games','שחקו בכל ארבעת המשחקים',function(){var f=F();return f.p_rush&&f.p_wh&&f.p_hm&&f.p_imp}],
+    ['both','🌍','Bilingual','דו־לשוני','Play in English and in Hebrew','שחקו באנגלית ובעברית',function(){return flag('l_en')&&flag('l_he')}],
+    ['lvl5','⭐','Rising star','כוכב עולה','Reach level 5','הגיעו לרמה 5',function(){return level()>=5}],
+    ['lvl10','🌟','Word wizard','קוסם המילים','Reach level 10','הגיעו לרמה 10',function(){return level()>=10}],
+    ['lr100','⚡','Word machine','מכונת מילים','Solve 100 words in Letter Rush Singleplayer','פתרו 100 מילים במרוץ אותיות ליחיד',function(){return (+L('lr-solved')||0)>=100}],
+    ['lr1k','🏅','High scorer','שובר שיאים','Score 1,000 in one Letter Rush Singleplayer game','השיגו 1,000 נקודות במשחק אחד של מרוץ אותיות ליחיד',function(){return maxKey('lr-b-')>=1000}],
+    ['lrday','📅','Daily habit','הרגל יומי','Play the Letter Rush daily 3 days in a row','שחקו את היומי של מרוץ אותיות 3 ימים ברצף',function(){return streak()>=3}],
+    ['lrbot','🤖','Bot buster','מנצח הבוטים','Beat the Expert bot in Letter Rush','נצחו את הבוט המומחה במרוץ אותיות',function(){return botWins('rush')>0}],
+    ['wh5k','💎','Treasure hunter','צייד אוצרות','Score 5,000 in Word Hunt Solo','השיגו 5,000 בציד מילים ליחיד',function(){return both('lr-wh-best')>=5000}],
+    ['whday','🗓️','Board of the day','לוח היום','Finish a Word Hunt daily','סיימו לוח יומי בציד מילים',function(){return anyKey('lr-whd-')}],
+    ['whbot','🦾','Faster than a machine','מהיר ממכונה','Beat the Expert bot in Word Hunt','נצחו את הבוט המומחה בציד מילים',function(){return botWins('wh')>0}],
+    ['hmflaw','🎯','Flawless','בלי טעויות','Solve a Hangman word with no mistakes','פתרו מילה באיש תלוי בלי אף טעות',function(){return flag('hm_flawless')}],
+    ['hm1k','🪢','Survivor','שורד','Score 1,500 in Hangman Solo','השיגו 1,500 באיש תלוי ליחיד',function(){return both('lr-hm-best')>=1500}],
+    ['hmbot','🦿','Outguessed the bot','ניחשתם את הבוט','Beat the Expert bot in Hangman','נצחו את הבוט המומחה באיש תלוי',function(){return botWins('hm')>0}],
+    ['imp1','🕵️','Party starter','פותחים מסיבה','Play a round of Imposter','שחקו סיבוב מתחזה',function(){return flag('imp_play')}],
+    ['impc','🔍','Detective','בלש','Catch the imposter','תפסו את המתחזה',function(){return flag('imp_crew')}],
+    ['impi','🎭','Master of disguise','אמן ההסוואה','Win as the imposters','נצחו כמתחזים',function(){return flag('imp_fool')}],
+    ['friend','🤝','Better together','ביחד זה יותר כיף','Open or join a friend’s room','פתחו חדר או הצטרפו לחדר של חבר',function(){return flag('friend')}],
+    ['win1','🏆','First victory','ניצחון ראשון','Win an online match','נצחו במשחק אונליין',function(){return flag('on_win')}],
+    ['win10','👑','Champion','אלוף','Win 10 online matches','נצחו ב-10 משחקי אונליין',function(){return flag('on_10')}],
+    ['egg','🔓','Secret keeper','שומר הסוד','Found the secret word hidden in the logo','גיליתם את המילה הסודית שבלוגו',function(){return flag('egg')},1],
+    ['ver','🔢','Curious mind','סקרנים','Tapped the version number 7 times','הקשתם 7 פעמים על מספר הגרסה',function(){return flag('ver')},1],
+    ['night','🦉','Night owl','ינשוף לילה','Played between midnight and 5 am','שיחקתם בין חצות לחמש בבוקר',function(){return flag('night')},1]
+  ];
+  var DEF=A.map(function(a){return {id:a[0],icon:a[1],t:T(a[2],a[3]),d:T(a[4],a[5]),test:a[6],secret:!!a[7]}});
+
+  function got(){return J('lr-ach',{})}
+  function addXp(n){S('lr-xp',xp()+n);try{if(typeof window.lrAddXp==='function')window.lrAddXp(n)}catch(e){}}
+  var queue=[],showing=false;
+  function css(){
+    if(document.getElementById('lrach-css'))return;
+    var s=document.createElement('style');s.id='lrach-css';
+    s.textContent='.achtoast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 12px);transform:translate(-50%,-160%);z-index:9999;display:flex;align-items:center;gap:12px;'+
+      'padding:10px 16px 10px 12px;border-radius:18px;background:var(--card,#fff);color:var(--ink,#1d1b4b);border:3px solid #ffcf3a;box-shadow:0 6px 0 #c99a06,0 12px 30px rgba(0,0,0,.25);'+
+      'font-weight:700;max-width:min(92vw,420px);transition:transform .5s cubic-bezier(.34,1.56,.64,1)}.achtoast.on{transform:translate(-50%,0)}'+
+      '.achtoast big{font-size:2rem;animation:achspin 1s cubic-bezier(.34,1.56,.64,1)}.achtoast small{display:block;font-weight:600;opacity:.75}.achtoast em{font-style:normal;color:#c99a06;margin-inline-start:6px}'+
+      '@keyframes achspin{0%{transform:scale(.2) rotate(-200deg)}100%{transform:none}}'+
+      'html.lr-disco body{animation:lrdisco 6s linear infinite}@keyframes lrdisco{to{filter:hue-rotate(360deg)}}'+
+      'html.lr-bouncy .sq,html.lr-bouncy .hml,html.lr-bouncy .logo span,html.lr-bouncy .wt{animation:lrbounce 1.2s ease-in-out infinite!important}'+
+      'html.lr-bouncy .sq:nth-child(2n),html.lr-bouncy .hml:nth-child(2n),html.lr-bouncy .logo span:nth-child(2n),html.lr-bouncy .wt:nth-child(2n){animation-delay:.3s!important}'+
+      '@keyframes lrbounce{0%,100%{translate:0 0}50%{translate:0 -6px}}'+
+      'html.lr-gold .logo span{background:linear-gradient(160deg,#ffe680,#f5b800)!important;border-color:#c99a06!important;box-shadow:0 5px 0 #a07800!important;color:#5a3d00!important}'+
+      '.lrconfirm{position:fixed;inset:0;z-index:9998;display:grid;place-items:center;background:rgba(10,8,40,.45);padding:16px}'+
+      '.lrconfirm .card{max-width:360px;width:100%;animation:achpop .35s cubic-bezier(.34,1.56,.64,1)}@keyframes achpop{from{transform:scale(.7);opacity:0}}';
+    document.head.appendChild(s);
+  }
+  function looks(){var h=document.documentElement;h.classList.toggle('lr-disco',L('lr-look-disco')==='1');h.classList.toggle('lr-bouncy',L('lr-look-bouncy')==='1');h.classList.toggle('lr-gold',L('lr-look-gold')==='1')}
+  function toast(a){
+    queue.push(a);if(showing)return;
+    (function next(){
+      var x=queue.shift();if(!x){showing=false;return}showing=true;css();
+      var el=document.createElement('div');el.className='achtoast';el.setAttribute('role','status');
+      el.innerHTML='<big>'+x.icon+'</big><span>'+T('Achievement unlocked','הישג חדש')+'<em>+50 XP</em><small>'+x.t+'</small></span>';
+      document.body.appendChild(el);
+      try{SFX.play('crown')}catch(e){}try{navigator.vibrate&&navigator.vibrate([40,40,80])}catch(e){}
+      requestAnimationFrame(function(){requestAnimationFrame(function(){el.classList.add('on')})});
+      setTimeout(function(){el.classList.remove('on');setTimeout(function(){el.remove();next()},500)},3200);
+    })();
+  }
+  function unlock(id){
+    var g=got();if(g[id])return false;var a=DEF.filter(function(x){return x.id===id})[0];if(!a)return false;
+    g[id]=Date.now();S('lr-ach',JSON.stringify(g));addXp(50);toast(a);return true;
+  }
+  function check(){var g=got();DEF.forEach(function(a){if(!g[a.id]){var ok=false;try{ok=a.test()}catch(e){}if(ok)unlock(a.id)}})}
+  function mark(f){var x=F();if(!x[f]){x[f]=1;S('lr-achf',JSON.stringify(x))}check()}
+  function online(p){if(!p)return;if(p.wins>=1)mark('on_win');if(p.wins>=10)mark('on_10')}
+  window.ACH={DEF:DEF,got:got,unlock:unlock,check:check,mark:mark,online:online,level:level,levelRange:levelRange,xp:xp,looks:looks,T:T};
+
+  /* Back button / back gesture. Pages set window.lrBack: it returns 'exit' when there is nowhere left to go back to. */
+  window.lrConfirm=function(text,yes,no,onYes){
+    css();var old=document.querySelector('.lrconfirm');if(old)old.remove();
+    var d=document.createElement('div');d.className='lrconfirm';
+    d.innerHTML='<div class="card stack"><b>'+text+'</b><button class="lrc-yes">'+yes+'</button><button class="alt lrc-no">'+no+'</button></div>';
+    document.body.appendChild(d);
+    d.querySelector('.lrc-yes').onclick=function(){d.remove();onYes()};
+    d.querySelector('.lrc-no').onclick=function(){d.remove()};
+    d.onclick=function(e){if(e.target===d)d.remove()};
+  };
+  window.lrBackGo=function(){
+    var c=document.querySelector('.lrconfirm');if(c){c.remove();return 'ok'}
+    try{return window.lrBack?window.lrBack():'exit'}catch(e){return 'exit'}
+  };
+  if(!window.Android){                       // in a browser: the phone's back gesture steps back inside the game too
+    try{history.pushState({lr:1},'');window.addEventListener('popstate',function(){if(window.lrBackGo()==='exit')history.back();else history.pushState({lr:1},'')})}catch(e){}
+  }
+
+  css();looks();
+  var h=new Date().getHours();if(h<5)mark('night');
+  try{window.Android&&Android.ready&&Android.ready()}catch(e){}   // tells the app this page loaded fine (an update that breaks is rolled back)
+  setTimeout(check,800);setInterval(check,5000);
+})();
+
+</script>
+<script>
+/* achievements: what counts as playing, winning, catching the imposter ... */
+window.lrAddXp=function(n){try{xp+=n}catch(e){}};
+(function(){
+  if(typeof ACH==='undefined')return;
+  function wrap(name,before){var f=window[name];if(typeof f!=='function')return;window[name]=function(){try{before.apply(this,arguments)}catch(e){}return f.apply(this,arguments)}}
+  function played(g){ACH.mark('p_'+g);ACH.mark('l_'+(typeof LANG!=='undefined'?LANG:'en'))}
+  wrap('soloRound',function(){played('rush')});
+  wrap('go',function(){played('rush')});
+  wrap('whPlay',function(){played('wh')});
+  wrap('hmPlay',function(){played('hm')});
+  wrap('imDeal',function(){played('imp')});
+  wrap('imEnter',function(){played('imp');ACH.mark('friend')});
+  wrap('showRoom',function(){ACH.mark('friend')});
+  wrap('hmDone',function(how){if(how==='solved'&&HM.misses===0)ACH.mark('hm_flawless')});
+  wrap('imLocalEnd',function(win){ACH.mark('imp_play');ACH.mark(win==='crew'?'imp_crew':'imp_fool')});
+  wrap('imOnlineDone',function(s){var me=s.players.filter(function(p){return p.id===s.me})[0]||{};ACH.mark('imp_play');
+    if(s.result.winner==='crew'&&!me.imp)ACH.mark('imp_crew');if(s.result.winner==='imp'&&me.imp)ACH.mark('imp_fool')});
+  wrap('applyM',function(s){
+    if(!s)return;if(s.status==='active')played(s.game==='wh'?'wh':s.game==='hm'?'hm':'rush');
+    if(s.kind==='private')ACH.mark('friend');
+    if(s.status==='finished'&&M&&M.ids&&s.winner&&s.winner===M.ids[M.me-1]){
+      var w=[];try{w=JSON.parse(localStorage.getItem('lr-achw')||'[]')}catch(e){}
+      if(w.indexOf(s.id)<0){w.push(s.id);try{localStorage.setItem('lr-achw',JSON.stringify(w.slice(-50)))}catch(e){}}
+      ACH.mark('on_win');if(w.length>=10)ACH.mark('on_10');
+    }
+  });
+})();
+/* back gesture: step back inside the game; leaving a game in progress asks first */
+(function(){
+  var vis=function(id){var e=document.getElementById(id);return !!e&&!e.classList.contains('hide')};
+  var tr2=function(e,h){return typeof LANG!=='undefined'&&LANG==='he'?h:e};
+  function leaving(){
+    if(typeof M!=='undefined'&&M&&M.id&&!M.ended&&(vis('game')||vis('wh')||vis('hm')||vis('mmready')))return function(){mmLeave()};
+    if(typeof IM!=='undefined'&&IM&&IM.mode==='online'&&IM.code&&IM.s&&IM.s.status!=='lobby'&&IM.s.status!=='done')return function(){imLeave()};
+    if(typeof IM!=='undefined'&&IM&&IM.mode==='local'&&(vis('imcard')||vis('imtalk')||vis('imvote')||vis('imguess')))return function(){imSetup()};
+    if(vis('hm')&&typeof HM!=='undefined'&&HM.live)return function(){hmStop();goMenu()};
+    if(vis('wh')&&typeof WH!=='undefined'&&(WH.live||WH.on))return function(){goMenu()};
+    if(vis('game')&&typeof done!=='undefined'&&!done)return function(){goMenu()};
+    return null;
+  }
+  window.lrBack=function(){
+    if(vis('howbox')){show('howbox',false);return 'ok'}
+    var f=leaving();
+    if(f){lrConfirm(tr2('Leave this game?','לצאת מהמשחק?'),tr2('Leave','יציאה'),tr2('Keep playing','ממשיכים לשחק'),f);return 'ok'}
+    if(vis('mm')&&vis('mmhostv')){$('fCancel').click();return 'ok'}
+    if(vis('mm')&&!vis('mmlobby')&&!vis('mmauth')&&!vis('mmready')&&typeof mLobby==='function'&&typeof IM!=='undefined'&&!IM.mode){mLobby();return 'ok'}
+    if(typeof IM!=='undefined'&&IM&&IM.mode==='online'&&IM.code){imLeave();return 'ok'}
+    goMenu();return 'ok';
+  };
+})();
+</script><script>
+(function(){var b=document.getElementById('musb');if(!b)return;function draw(){var on=SFX.musicOn();b.textContent=on?'🎵':'🎵̸';b.classList.toggle('off',!on);b.setAttribute('aria-label',on?'Music on':'Music off')}
+b.onclick=function(e){e.stopPropagation();SFX.music(!SFX.musicOn());draw()};draw()})();
 </script></body></html>
