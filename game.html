@@ -306,8 +306,9 @@ b{font-weight:700}.card>b:first-child{font-size:1.2rem}
 .lrdef i{color:var(--mute)}
 .lrdefpop{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:9996;width:min(92vw,420px)}
 #hmhint{width:auto;margin:4px auto 0;padding:8px 18px;display:block}
+.lrdef{animation:lrdefin .35s ease both}@keyframes lrdefin{from{opacity:0;transform:translateY(4px)}}
 </style></head><body><main>
-<header><h1 class="logo" aria-label="Letter Rush"><span>L</span><span>E</span><span>T</span><span class="r">T</span><span>E</span><span>R</span><span class="sp"></span><span>R</span><span>U</span><span class="r">S</span><span>H</span></h1><div style="display:flex;gap:8px"><button class="ib" id="helpb" aria-label="How to play">?</button><button id="musb" class="ib" aria-label="Music">🎵</button><button class="ib" id="snd" aria-label="Sound">🔊</button><button id="theme" aria-label="Light or dark">🌙</button></div></header>
+<header><h1 class="logo" aria-label="Letter Rush"><span>L</span><span>E</span><span>T</span><span class="r">T</span><span>E</span><span>R</span><span class="sp"></span><span>R</span><span>U</span><span class="r">S</span><span>H</span></h1><div style="display:flex;gap:8px"><button class="ib" id="helpb" aria-label="How to play">?</button><button class="ib" id="setb" aria-label="Settings">⚙️</button><span hidden><button id="musb" class="ib" aria-label="Music">🎵</button><button class="ib" id="snd" aria-label="Sound">🔊</button><button id="theme" aria-label="Light or dark">🌙</button></span></div></header>
 
 <section id="menu" class="stack">
   <div class="card hide" id="botcard"><b>Bot level</b><div id="botlv" style="margin-top:10px"></div></div>
@@ -4974,13 +4975,17 @@ const DEFN=(()=>{
     const q=fin(String(w||'').toLowerCase());if(!q)return null;if(q in cache)return cache[q];cache[q]=null;
     try{const c=new AbortController();const t=setTimeout(()=>c.abort(),5000);
       const r=await fetch('https://en.wiktionary.org/api/rest_v1/page/definition/'+encodeURIComponent(q),{signal:c.signal});clearTimeout(t);
-      if(!r.ok)return null;const j=await r.json();
+      if(!r.ok)throw 0;const j=await r.json();
       for(const e of (j[LANG==='he'?'he':'en']||[]))for(const d of (e.definitions||[])){const x=strip(d.definition);if(x.length>2)return cache[q]={w:q,pos:e.partOfSpeech||'',t:x.length>150?x.slice(0,147)+'…':x}}
     }catch(e){}
-    return null;
+    if(LANG!=='he')try{const c=new AbortController();const t=setTimeout(()=>c.abort(),5000);
+      const r=await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(q),{signal:c.signal});clearTimeout(t);
+      if(r.ok){const j=await r.json();for(const e of (Array.isArray(j)?j:[]))for(const m of (e.meanings||[]))for(const d of (m.definitions||[])){const x=strip(d.definition);if(x.length>2)return cache[q]={w:q,pos:m.partOfSpeech?m.partOfSpeech[0].toUpperCase()+m.partOfSpeech.slice(1):'',t:x.length>150?x.slice(0,147)+'…':x}}}
+    }catch(e){}
+    delete cache[q];return null;
   }
   const html=r=>'📖 <b>'+esc(r.w)+'</b> <i>'+esc(r.pos)+'</i> — '+esc(r.t);
-  async function show(w,el){if(!el)return;const g=++seq;el.innerHTML='';const r=await get(w);if(g!==seq||!r)return;el.innerHTML='<div class="lrdef">'+html(r)+'</div>'}
+  async function show(w,el){if(!el)return;const g=++seq;const r=await get(w);if(g!==seq||!r)return;el.innerHTML='<div class="lrdef">'+html(r)+'</div>'}
   async function pop(w){const r=await get(w);document.querySelectorAll('.lrdefpop').forEach(x=>x.remove());if(!r)return;
     const d=document.createElement('div');d.className='lrdef lrdefpop';d.innerHTML=html(r);d.onclick=()=>d.remove();document.body.appendChild(d);setTimeout(()=>d.remove(),6000)}
   return {get,show,pop,clear(el){seq++;if(el)el.innerHTML=''}};
@@ -4989,12 +4994,14 @@ const DEFN=(()=>{
   const wrap=(name,before,after)=>{const f=window[name];if(typeof f!=='function')return;window[name]=function(){try{before&&before.apply(this,arguments)}catch(e){}const r=f.apply(this,arguments);try{after&&after.apply(this,arguments)}catch(e){}return r}};
   const box=()=>{let b=document.getElementById('lrdefbox');if(!b){b=document.createElement('div');b.id='lrdefbox';$('hint').after(b)}return b};
   wrap('fillBoxes',null,function(w){if(w)DEFN.show(w,box())});
-  wrap('soloRound',function(){DEFN.clear(document.getElementById('lrdefbox'))});
-  wrap('go',function(){DEFN.clear(document.getElementById('lrdefbox'))});
+  const clr=()=>DEFN.clear(document.getElementById('lrdefbox'));
+  wrap('soloStart',clr);wrap('start',clr);wrap('mRound',function(n){if(n===1)clr()});
   const hbox=()=>{let b=document.getElementById('hmdef');if(!b){b=document.createElement('div');b.id='hmdef';$('hmmsg').after(b)}return b};
   wrap('hmDone',function(how,word){if(how==='solved')DEFN.show(word,hbox())});
-  wrap('hmNewWord',function(){DEFN.clear(document.getElementById('hmdef'))});
-  wrap('hmSetWord',function(){DEFN.clear(document.getElementById('hmdef'))});
+  wrap('hmPlay',function(){DEFN.clear(document.getElementById('hmdef'))});
+  // results screens: a hint that words can be tapped for their meaning
+  const tip=id=>{const el=document.getElementById(id);if(!el)return;new MutationObserver(()=>{if(el.querySelector('.wchip')&&!el.querySelector('.lrdtip')){const p=document.createElement('p');p.className='note lrdtip';p.style.textAlign='center';p.textContent=tr('📖 Tap a word to see what it means','📖 הקישו על מילה כדי לראות מה היא אומרת');el.appendChild(p)}}).observe(el,{childList:true})};
+  tip('whres');tip('hmres');
   document.addEventListener('click',e=>{const c=e.target.closest&&e.target.closest('#whres .wchip,#hmres .wchip');if(c){const w=(c.firstChild&&c.firstChild.nodeType===3?c.firstChild.textContent:c.textContent).trim();if(w)DEFN.pop(w)}});
 })();
 
@@ -5024,4 +5031,71 @@ const DEFN=(()=>{
   wrap('soloEnd',function(){if(typeof sSolved!=='undefined'&&sSolved>=5)flame(PAY.win())});
   const f=window.applyM;if(typeof f==='function')window.applyM=function(s){const r=f.apply(this,arguments);try{if(s&&s.status==='finished'&&(s.game||'rush')==='rush'&&M&&M.ids&&s.winner===M.ids[M.me-1])flame(PAY.win())}catch(e){}return r};
 })();
-</script></body></html>
+</script><script>
+/* Settings menu (⚙️): music, sound, dark mode and (on the home screen) language, in one bottom sheet.
+   The old header buttons stay in the page, hidden, so their own handlers keep doing the work. */
+(function(){
+  var HE=false;try{HE=localStorage.getItem('lr-lang')==='he'}catch(e){}
+  function T(en,he){return HE?he:en}
+  function g(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function s(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  var $=function(id){return document.getElementById(id)};
+  function dark(){var t=document.documentElement.dataset.theme;return t?t==='dark':!!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
+  function soundOn(){try{if(typeof snd!=='undefined')return !!snd}catch(e){}return g('lr-snd')!=='0'}
+  function musicOn(){try{return SFX.musicOn()}catch(e){return g('lr-music')!=='0'}}
+  var ROWS=[
+    {k:'music',ic:'🎵',en:'Music',he:'מוזיקה',on:musicOn,flip:function(){var b=$('musb');if(b)b.click();else{try{SFX.music(!musicOn())}catch(e){}}}},
+    {k:'sound',ic:'🔊',en:'Sound effects',he:'אפקטים קוליים',on:soundOn,flip:function(){var b=$('snd');if(b)b.click();else s('lr-snd',soundOn()?'0':'1')}},
+    {k:'dark',ic:'🌙',en:'Dark mode',he:'מצב כהה',on:dark,flip:function(){var b=$('theme');if(b){b.click();return}
+      var t=dark()?'light':'dark';document.documentElement.dataset.theme=t;s('lr-theme',t)}}
+  ];
+  function css(){
+    if($('lrset-css'))return;var st=document.createElement('style');st.id='lrset-css';
+    st.textContent=
+      'html,body{overflow-x:hidden;max-width:100%}body{touch-action:manipulation}'+
+      '.lrsetb{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);inset-inline-start:max(14px,env(safe-area-inset-left,0px));z-index:5;width:auto;padding:8px 12px;border-radius:14px;font-size:1.05rem;line-height:1;background:var(--card);color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);animation:none}'+
+      '.lrsetb:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}'+
+      '.lrset{position:fixed;inset:0;z-index:9996;display:grid;place-items:end center;background:rgba(10,8,40,.5)}'+
+      '.lrset .sheet{width:min(480px,100%);max-height:92vh;overflow:auto;background:var(--card,#fff);color:var(--ink,#1d1b4b);border-radius:26px 26px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;animation:lrsup .4s cubic-bezier(.34,1.56,.64,1)}'+
+      '@keyframes lrsup{from{transform:translateY(100%)}}'+
+      '.lrset h3{margin:0 0 4px;font-size:1.4rem;text-align:center}'+
+      '.lrset .srow{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px 16px;border-radius:18px;border:2px solid var(--line,#ddd);background:var(--tile,#f6f6ff);color:var(--ink,#1d1b4b);font-weight:800;font-size:1.05rem;box-shadow:0 4px 0 var(--line,#ddd);animation:none;text-align:start}'+
+      '.lrset .srow:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line,#ddd)}'+
+      '.lrset .sw{flex:none;width:52px;height:30px;border-radius:999px;background:var(--line,#ccd);position:relative;transition:background .2s}'+
+      '.lrset .sw::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.25);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}'+
+      '.lrset .srow.on .sw{background:#20b26c}.lrset .srow.on .sw::after{transform:translateX(22px)}'+
+      '[dir=rtl] .lrset .srow.on .sw::after{transform:translateX(-22px)}'+
+      '.lrset .lang{display:grid;grid-template-columns:1fr 1fr;gap:8px}'+
+      '.lrset .lang button{padding:12px;border-radius:14px;font-weight:800;animation:none;width:100%}'+
+      '.lrset .lang button.cur{background:var(--acc,#5b4cf0);color:#fff;border-color:transparent}'+
+      '.lrset .lab{font-size:.85rem;color:var(--mute,#777);font-weight:700;margin:6px 4px 0}';
+    document.head.appendChild(st);
+  }
+  function open(){
+    css();var old=document.querySelector('.lrset');if(old)old.remove();
+    var d=document.createElement('div');d.className='lrset';
+    var home=!!$('langb');
+    d.innerHTML='<div class="sheet"><h3>⚙️ '+T('Settings','הגדרות')+'</h3>'+
+      ROWS.map(function(r){return '<button class="srow" data-k="'+r.k+'"><span>'+r.ic+' '+T(r.en,r.he)+'</span><span class="sw" aria-hidden="true"></span></button>'}).join('')+
+      (home?'<div class="lab">🌐 '+T('Language','שפה')+'</div><div class="lang"><button class="'+(HE?'alt':'alt cur')+'" data-l="en">English</button><button class="'+(HE?'alt cur':'alt')+'" data-l="he">עברית</button></div>':'')+
+      '<button class="alt lrsclose">'+T('Close','סגירה')+'</button></div>';
+    function draw(){ROWS.forEach(function(r){var b=d.querySelector('[data-k="'+r.k+'"]');var on=!!r.on();b.classList.toggle('on',on);b.setAttribute('role','switch');b.setAttribute('aria-checked',on?'true':'false')})}
+    ROWS.forEach(function(r){d.querySelector('[data-k="'+r.k+'"]').onclick=function(){r.flip();draw();try{SFX.play('blip',660)}catch(e){}}});
+    [].forEach.call(d.querySelectorAll('.lang button'),function(b){b.onclick=function(){if((b.dataset.l==='he')!==HE)$('langb').click()}});
+    d.querySelector('.lrsclose').onclick=function(){d.remove()};
+    d.onclick=function(e){if(e.target===d)d.remove()};
+    draw();document.body.appendChild(d);
+  }
+  window.lrSettings=open;
+  // the back gesture closes an open sheet first (settings, store, a definition popup)
+  var prev=window.lrBackGo;
+  window.lrBackGo=function(){
+    var x=document.querySelector('.lrset,.lrstore,.lrdefpop');if(x){x.remove();return 'ok'}
+    return prev?prev():'exit';
+  };
+  css();
+  var b=$('setb');if(b)b.onclick=function(e){e.stopPropagation();open()};
+})();
+
+</script>
+</body></html>

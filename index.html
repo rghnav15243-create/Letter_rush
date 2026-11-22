@@ -126,8 +126,8 @@ input:focus{outline:none;border-color:var(--acc)}
 .stc h4{margin:0 0 8px;font-size:1.05rem}.stg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .stg div{background:var(--tile,transparent);border-radius:12px;padding:8px 6px;text-align:center}.stg b{display:block;font-size:1.25rem}.stg small{font-size:.72rem;color:var(--mute);font-weight:600}
 .sthead{display:flex;align-items:center;gap:12px;justify-content:center;font-weight:800;font-size:1.1rem}.sthead big{font-size:2.4rem}
-</style></head><body><button id="langb" class="langb" aria-label="Language">עב</button>
-<button id="musb" class="musb" aria-label="Music">🎵</button>
+</style></head><body><span hidden><button id="langb" class="langb" aria-label="Language">עב</button></span>
+<span hidden><button id="musb" class="musb" aria-label="Music">🎵</button></span><button id="setb" class="lrsetb" aria-label="Settings">⚙️</button>
 <main>
 <div class="logo" aria-label="Letter Rush" role="img"><div><span>L</span><span>E</span><span>T</span><span class="r">T</span><span>E</span><span>R</span></div><div><span>R</span><span>U</span><span class="r">S</span><span>H</span></div></div>
 <p class="tag">Think fast. Spell faster.</p>
@@ -174,7 +174,7 @@ input:focus{outline:none;border-color:var(--acc)}
 <div id="labv" class="hide col"><p class="which" id="labt"></p><p class="trsum" id="labsum"></p><div id="lablist" class="col"></div></div>
 <div class="bgl" aria-hidden="true"></div>
 <button id="back" class="link hide">Back</button>
-<p class="ver">Version 1.1</p>
+<p class="ver">Version 1.2</p>
 </main><script>
 
 const SFX=(()=>{
@@ -3090,4 +3090,71 @@ $('coinb').onclick=function(){try{SFX.play('click')}catch(e){}PAY.store(null,nul
 function hud2(){$('coinc').textContent=PAY.unlimited()?'∞':PAY.credits();var s=PAY.streak();var x=$('lvlx');if(x&&s.n>0&&x.textContent.indexOf('🔥')<0)x.textContent+=' · 🔥 '+s.n}
 hud2();setInterval(hud2,2000);
 })();
-</script></body></html>
+</script><script>
+/* Settings menu (⚙️): music, sound, dark mode and (on the home screen) language, in one bottom sheet.
+   The old header buttons stay in the page, hidden, so their own handlers keep doing the work. */
+(function(){
+  var HE=false;try{HE=localStorage.getItem('lr-lang')==='he'}catch(e){}
+  function T(en,he){return HE?he:en}
+  function g(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function s(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  var $=function(id){return document.getElementById(id)};
+  function dark(){var t=document.documentElement.dataset.theme;return t?t==='dark':!!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
+  function soundOn(){try{if(typeof snd!=='undefined')return !!snd}catch(e){}return g('lr-snd')!=='0'}
+  function musicOn(){try{return SFX.musicOn()}catch(e){return g('lr-music')!=='0'}}
+  var ROWS=[
+    {k:'music',ic:'🎵',en:'Music',he:'מוזיקה',on:musicOn,flip:function(){var b=$('musb');if(b)b.click();else{try{SFX.music(!musicOn())}catch(e){}}}},
+    {k:'sound',ic:'🔊',en:'Sound effects',he:'אפקטים קוליים',on:soundOn,flip:function(){var b=$('snd');if(b)b.click();else s('lr-snd',soundOn()?'0':'1')}},
+    {k:'dark',ic:'🌙',en:'Dark mode',he:'מצב כהה',on:dark,flip:function(){var b=$('theme');if(b){b.click();return}
+      var t=dark()?'light':'dark';document.documentElement.dataset.theme=t;s('lr-theme',t)}}
+  ];
+  function css(){
+    if($('lrset-css'))return;var st=document.createElement('style');st.id='lrset-css';
+    st.textContent=
+      'html,body{overflow-x:hidden;max-width:100%}body{touch-action:manipulation}'+
+      '.lrsetb{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);inset-inline-start:max(14px,env(safe-area-inset-left,0px));z-index:5;width:auto;padding:8px 12px;border-radius:14px;font-size:1.05rem;line-height:1;background:var(--card);color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);animation:none}'+
+      '.lrsetb:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}'+
+      '.lrset{position:fixed;inset:0;z-index:9996;display:grid;place-items:end center;background:rgba(10,8,40,.5)}'+
+      '.lrset .sheet{width:min(480px,100%);max-height:92vh;overflow:auto;background:var(--card,#fff);color:var(--ink,#1d1b4b);border-radius:26px 26px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;animation:lrsup .4s cubic-bezier(.34,1.56,.64,1)}'+
+      '@keyframes lrsup{from{transform:translateY(100%)}}'+
+      '.lrset h3{margin:0 0 4px;font-size:1.4rem;text-align:center}'+
+      '.lrset .srow{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px 16px;border-radius:18px;border:2px solid var(--line,#ddd);background:var(--tile,#f6f6ff);color:var(--ink,#1d1b4b);font-weight:800;font-size:1.05rem;box-shadow:0 4px 0 var(--line,#ddd);animation:none;text-align:start}'+
+      '.lrset .srow:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line,#ddd)}'+
+      '.lrset .sw{flex:none;width:52px;height:30px;border-radius:999px;background:var(--line,#ccd);position:relative;transition:background .2s}'+
+      '.lrset .sw::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.25);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}'+
+      '.lrset .srow.on .sw{background:#20b26c}.lrset .srow.on .sw::after{transform:translateX(22px)}'+
+      '[dir=rtl] .lrset .srow.on .sw::after{transform:translateX(-22px)}'+
+      '.lrset .lang{display:grid;grid-template-columns:1fr 1fr;gap:8px}'+
+      '.lrset .lang button{padding:12px;border-radius:14px;font-weight:800;animation:none;width:100%}'+
+      '.lrset .lang button.cur{background:var(--acc,#5b4cf0);color:#fff;border-color:transparent}'+
+      '.lrset .lab{font-size:.85rem;color:var(--mute,#777);font-weight:700;margin:6px 4px 0}';
+    document.head.appendChild(st);
+  }
+  function open(){
+    css();var old=document.querySelector('.lrset');if(old)old.remove();
+    var d=document.createElement('div');d.className='lrset';
+    var home=!!$('langb');
+    d.innerHTML='<div class="sheet"><h3>⚙️ '+T('Settings','הגדרות')+'</h3>'+
+      ROWS.map(function(r){return '<button class="srow" data-k="'+r.k+'"><span>'+r.ic+' '+T(r.en,r.he)+'</span><span class="sw" aria-hidden="true"></span></button>'}).join('')+
+      (home?'<div class="lab">🌐 '+T('Language','שפה')+'</div><div class="lang"><button class="'+(HE?'alt':'alt cur')+'" data-l="en">English</button><button class="'+(HE?'alt cur':'alt')+'" data-l="he">עברית</button></div>':'')+
+      '<button class="alt lrsclose">'+T('Close','סגירה')+'</button></div>';
+    function draw(){ROWS.forEach(function(r){var b=d.querySelector('[data-k="'+r.k+'"]');var on=!!r.on();b.classList.toggle('on',on);b.setAttribute('role','switch');b.setAttribute('aria-checked',on?'true':'false')})}
+    ROWS.forEach(function(r){d.querySelector('[data-k="'+r.k+'"]').onclick=function(){r.flip();draw();try{SFX.play('blip',660)}catch(e){}}});
+    [].forEach.call(d.querySelectorAll('.lang button'),function(b){b.onclick=function(){if((b.dataset.l==='he')!==HE)$('langb').click()}});
+    d.querySelector('.lrsclose').onclick=function(){d.remove()};
+    d.onclick=function(e){if(e.target===d)d.remove()};
+    draw();document.body.appendChild(d);
+  }
+  window.lrSettings=open;
+  // the back gesture closes an open sheet first (settings, store, a definition popup)
+  var prev=window.lrBackGo;
+  window.lrBackGo=function(){
+    var x=document.querySelector('.lrset,.lrstore,.lrdefpop');if(x){x.remove();return 'ok'}
+    return prev?prev():'exit';
+  };
+  css();
+  var b=$('setb');if(b)b.onclick=function(e){e.stopPropagation();open()};
+})();
+
+</script>
+</body></html>
