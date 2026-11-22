@@ -117,12 +117,21 @@ input:focus{outline:none;border-color:var(--acc)}
 .labt em{font-style:normal;padding:4px 12px;border-radius:999px;background:var(--line);color:var(--mute);font-size:.85rem}.labt.on em{background:#20b26c;color:#fff}
 .ver{cursor:pointer;user-select:none}
 .musb{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);inset-inline-start:max(14px,env(safe-area-inset-left,0px));z-index:5;width:auto;padding:8px 12px;border-radius:14px;font-size:1rem;background:var(--card);color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);animation:none}.musb.off{opacity:.55}
+
+.coin{background:#20b26c;color:#fff;box-shadow:0 4px 0 #13814c}
+.tabs{display:flex;gap:6px;background:var(--line);padding:4px;border-radius:16px}
+.tabs button{flex:1;padding:10px;border-radius:12px;background:transparent;color:var(--mute);box-shadow:none;font-size:.95rem;animation:none}
+.tabs button.on{background:var(--card);color:var(--ink);box-shadow:0 3px 0 var(--line)}
+.stc{padding:12px 14px;border-radius:18px;background:var(--card);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);animation:rise .4s var(--spring) both}
+.stc h4{margin:0 0 8px;font-size:1.05rem}.stg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.stg div{background:var(--tile,transparent);border-radius:12px;padding:8px 6px;text-align:center}.stg b{display:block;font-size:1.25rem}.stg small{font-size:.72rem;color:var(--mute);font-weight:600}
+.sthead{display:flex;align-items:center;gap:12px;justify-content:center;font-weight:800;font-size:1.1rem}.sthead big{font-size:2.4rem}
 </style></head><body><button id="langb" class="langb" aria-label="Language">עב</button>
 <button id="musb" class="musb" aria-label="Music">🎵</button>
 <main>
 <div class="logo" aria-label="Letter Rush" role="img"><div><span>L</span><span>E</span><span>T</span><span class="r">T</span><span>E</span><span>R</span></div><div><span>R</span><span>U</span><span class="r">S</span><span>H</span></div></div>
 <p class="tag">Think fast. Spell faster.</p>
-<div class="lvl"><button id="lvlb" class="lvlb"><span id="lvln"></span><i><b id="lvlf"></b></i><small id="lvlx"></small></button><button id="trophy" class="trb">🏆 <span id="trc"></span></button></div>
+<div class="lvl"><button id="lvlb" class="lvlb"><span id="lvln"></span><i><b id="lvlf"></b></i><small id="lvlx"></small></button><button id="trophy" class="trb">🏆 <span id="trc"></span></button><button id="coinb" class="trb coin">🪙 <span id="coinc"></span></button></div>
 <p id="err" class="hide">Couldn’t connect to that game</p>
 <div id="home" class="col">
   <button id="gRush" class="game"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="3" y="14" width="14" height="22" rx="4" fill="#fff" opacity=".55"/><rect x="19" y="14" width="14" height="22" rx="4" fill="#ffcf3a"/><rect x="35" y="14" width="14" height="22" rx="4" fill="#fff" opacity=".55"/></svg><span><b>Letter Rush</b><small>Fill the boxes before your rival does</small></span></button>
@@ -137,14 +146,14 @@ input:focus{outline:none;border-color:var(--acc)}
   <button id="multi" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="20" fill="#fff" opacity=".25"/><circle cx="26" cy="26" r="20" fill="none" stroke="#fff" stroke-width="4"/><path d="M6 26h40M26 6c7 6 7 34 0 40M26 6c-7 6-7 34 0 40" fill="none" stroke="#fff" stroke-width="3.5"/></svg><span><b>Online</b><small>Ranked, friends &amp; leaderboard</small></span></button>
 </div>
 <div id="whv" class="hide col"><p class="which">Word Hunt</p>
-  <button id="whSolo" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="28" r="17" fill="#fff" opacity=".25"/><circle cx="26" cy="28" r="15" fill="none" stroke="#fff" stroke-width="4"/><path d="M26 28V19M26 28l6 4" stroke="#fff" stroke-width="4" stroke-linecap="round"/><rect x="21" y="5" width="10" height="5" rx="2" fill="#fff"/></svg><span><b>Solo</b><small>80 seconds, beat your best</small></span></button>
+  <button id="whSolo" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="28" r="17" fill="#fff" opacity=".25"/><circle cx="26" cy="28" r="15" fill="none" stroke="#fff" stroke-width="4"/><path d="M26 28V19M26 28l6 4" stroke="#fff" stroke-width="4" stroke-linecap="round"/><rect x="21" y="5" width="10" height="5" rx="2" fill="#fff"/></svg><span><b>Solo</b><small>Classic, Blitz or Zen</small></span></button>
   <button id="whDaily" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="7" y="10" width="38" height="36" rx="7" fill="#fff" opacity=".25"/><rect x="7" y="10" width="38" height="36" rx="7" fill="none" stroke="#fff" stroke-width="4"/><path d="M7 21h38M17 5v10M35 5v10" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="26" cy="33" r="5" fill="#fff"/></svg><span><b>Daily</b><small>Same board for everyone today</small></span></button>
   <button id="whBot" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="9" y="15" width="34" height="28" rx="8" fill="#fff" opacity=".25"/><rect x="9" y="15" width="34" height="28" rx="8" fill="none" stroke="#fff" stroke-width="4"/><circle cx="20" cy="28" r="4" fill="#fff"/><circle cx="32" cy="28" r="4" fill="#fff"/><path d="M20 36h12M26 15V8" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="26" cy="7" r="3" fill="#fff"/></svg><span><b>vs Bot</b><small>Easy to Expert</small></span></button>
   <button id="whLocal" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="13" y="4" width="26" height="44" rx="6" fill="#fff" opacity=".25"/><rect x="13" y="4" width="26" height="44" rx="6" fill="none" stroke="#fff" stroke-width="4"/><circle cx="21" cy="20" r="4" fill="#fff"/><circle cx="31" cy="32" r="4" fill="#fff"/></svg><span><b>2 Players</b><small>Take turns on one phone</small></span></button>
   <button id="whOnline" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="20" fill="#fff" opacity=".25"/><circle cx="26" cy="26" r="20" fill="none" stroke="#fff" stroke-width="4"/><path d="M6 26h40M26 6c7 6 7 34 0 40M26 6c-7 6-7 34 0 40" fill="none" stroke="#fff" stroke-width="3.5"/></svg><span><b>Online</b><small>Ranked, friends &amp; leaderboard</small></span></button>
 </div>
 <div id="hmv" class="hide col"><p class="which">Hangman</p>
-  <button id="hmSolo" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="28" r="17" fill="#fff" opacity=".25"/><circle cx="26" cy="28" r="15" fill="none" stroke="#fff" stroke-width="4"/><path d="M26 28V19M26 28l6 4" stroke="#fff" stroke-width="4" stroke-linecap="round"/><rect x="21" y="5" width="10" height="5" rx="2" fill="#fff"/></svg><span><b>Solo</b><small>How many words before you hang?</small></span></button>
+  <button id="hmSolo" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="28" r="17" fill="#fff" opacity=".25"/><circle cx="26" cy="28" r="15" fill="none" stroke="#fff" stroke-width="4"/><path d="M26 28V19M26 28l6 4" stroke="#fff" stroke-width="4" stroke-linecap="round"/><rect x="21" y="5" width="10" height="5" rx="2" fill="#fff"/></svg><span><b>Solo</b><small>Classic, Blitz or Zen</small></span></button>
   <button id="hmDaily" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="7" y="10" width="38" height="36" rx="7" fill="#fff" opacity=".25"/><rect x="7" y="10" width="38" height="36" rx="7" fill="none" stroke="#fff" stroke-width="4"/><path d="M7 21h38M17 5v10M35 5v10" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="26" cy="33" r="5" fill="#fff"/></svg><span><b>Daily</b><small>One word for everyone today</small></span></button>
   <button id="hmBot" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="9" y="15" width="34" height="28" rx="8" fill="#fff" opacity=".25"/><rect x="9" y="15" width="34" height="28" rx="8" fill="none" stroke="#fff" stroke-width="4"/><circle cx="20" cy="28" r="4" fill="#fff"/><circle cx="32" cy="28" r="4" fill="#fff"/><path d="M20 36h12M26 15V8" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="26" cy="7" r="3" fill="#fff"/></svg><span><b>vs Bot</b><small>Easy to Expert</small></span></button>
   <button id="hmLocal" class="mode"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="13" y="4" width="26" height="44" rx="6" fill="#fff" opacity=".25"/><rect x="13" y="4" width="26" height="44" rx="6" fill="none" stroke="#fff" stroke-width="4"/><circle cx="21" cy="20" r="4" fill="#fff"/><circle cx="31" cy="32" r="4" fill="#fff"/></svg><span><b>2 Players</b><small>Pick a secret word for each other</small></span></button>
@@ -161,11 +170,11 @@ input:focus{outline:none;border-color:var(--acc)}
 </div>
 <div id="hostv" class="card hide"><p class="mute">Your friend taps Join. Your address:</p><p class="big" id="ip"></p><div class="qr hide" id="ipqr"></div><p class="mute hide" id="ipqrt">Or scan to play in the browser, no app needed</p><button id="open">Start game</button></div>
 <div id="joinv" class="card hide"><p class="mute">Looking for a game nearby<span class="dots"><span>.</span><span>.</span><span>.</span></span></p><input id="manual" placeholder="or type the host’s address" inputmode="decimal"><button id="go" class="alt">Join</button></div>
-<div id="trophyv" class="hide col"><p class="which" id="trt"></p><p class="trsum" id="trsum"></p><div id="trlist" class="trl"></div></div>
+<div id="trophyv" class="hide col"><div class="tabs"><button id="tabS" class="on"></button><button id="tabA"></button></div><p class="which" id="trt"></p><div id="stlist" class="col"></div><p class="trsum" id="trsum"></p><div id="trlist" class="trl"></div></div>
 <div id="labv" class="hide col"><p class="which" id="labt"></p><p class="trsum" id="labsum"></p><div id="lablist" class="col"></div></div>
 <div class="bgl" aria-hidden="true"></div>
 <button id="back" class="link hide">Back</button>
-<p class="ver">Version 1.0</p>
+<p class="ver">Version 1.1</p>
 </main><script>
 
 const SFX=(()=>{
@@ -344,7 +353,7 @@ window.HE_OK=true;
     'Server':'שרת','Save':'שמירה','Server settings':'הגדרות שרת','Pick a name and play':'בחרו שם ושחקו','Choose a username':'בחרו שם משתמש',
     'Let’s go!':'יאללה!','Continue with Google':'המשך עם Google','Use email and password':'כניסה עם אימייל וסיסמה','Email':'אימייל',
     'Password':'סיסמה','Username (new account)':'שם משתמש (חשבון חדש)','Sign in':'כניסה','Create account':'יצירת חשבון',
-    'Play ranked':'משחק מדורג','⚡ Quick match':'⚡ משחק מהיר','🤝 Play a friend':'🤝 שחקו עם חבר','Imposter':'מתחזה','Find who doesn’t know the word':'גלו מי לא יודע את המילה','One phone':'טלפון אחד','Pass one phone around':'מעבירים טלפון אחד','Several phones':'כמה טלפונים','Everyone on their own phone':'כל אחד בטלפון שלו','🕵️ You’re invited to Imposter!':'🕵️ הוזמנתם למשחק מתחזה!','Play a friend':'שחקו עם חבר','Leaderboard':'טבלת מובילים','Save account with Google':'שמירת החשבון עם Google',
+    'Play ranked':'משחק מדורג','Classic, Blitz or Zen':'קלאסי, בליץ או זן','5 long words (8–12 letters), same for everyone':'5 מילים ארוכות (8–12 אותיות), זהות לכולם','⚡ Quick match':'⚡ משחק מהיר','🤝 Play a friend':'🤝 שחקו עם חבר','Imposter':'מתחזה','Find who doesn’t know the word':'גלו מי לא יודע את המילה','One phone':'טלפון אחד','Pass one phone around':'מעבירים טלפון אחד','Several phones':'כמה טלפונים','Everyone on their own phone':'כל אחד בטלפון שלו','🕵️ You’re invited to Imposter!':'🕵️ הוזמנתם למשחק מתחזה!','Play a friend':'שחקו עם חבר','Leaderboard':'טבלת מובילים','Save account with Google':'שמירת החשבון עם Google',
     'Sign out':'התנתקות','Create room':'יצירת חדר','or join your friend’s room':'או הצטרפו לחדר של חבר','CODE':'קוד','Join':'הצטרפות',
     'Your room code':'קוד החדר שלכם','Copy code':'העתקת קוד','Copied':'הועתק','Copy link':'העתקת קישור','Link copied':'הקישור הועתק','Scan with any phone camera to play. No app needed.':'סרקו עם המצלמה של כל טלפון ושחקו. בלי להתקין כלום.','⚔️ You’ve been challenged!':'⚔️ הזמינו אתכם לקרב!','Pick a name and tap Let’s go.':'בחרו שם ולחצו יאללה!','Or scan to play in the browser, no app needed':'או סרקו ושחקו בדפדפן, בלי אפליקציה','Change username':'שינוי שם משתמש',
     'Sign out of a guest account?':'להתנתק מחשבון אורח?',
@@ -2910,7 +2919,7 @@ function trophies(){
     var hide=a.secret&&!on;return '<div class="tr '+(on?'on':'off')+'" style="animation-delay:'+(i*25)+'ms"><big>'+(hide?'❓':a.icon)+'</big><span><b>'+(hide?T('Secret','סודי'):a.t)+'</b><small>'+(hide?T('Keep exploring…','המשיכו לחפש…'):a.d)+'</small></span></div>'}).join('');
   $('trsum').textContent=have+' / '+ACH.DEF.length+' · '+T('Level ','רמה ')+ACH.level()+' · '+ACH.xp()+' XP';
 }
-$('trophy').onclick=function(){try{SFX.play('click')}catch(e){}trophies();view('trophyv')};
+window.lrTrophies=trophies;$('trophy').onclick=function(){try{SFX.play('click')}catch(e){}trophies();view('trophyv')};
 $('lvlb').onclick=$('trophy').onclick;
 /* the Secret Lab */
 var LOOKS=[['disco','🌈',T('Disco mode','מצב דיסקו'),T('Colours that never stop','צבעים שלא נגמרים')],['bouncy','🎈',T('Bouncy tiles','אותיות קופצות'),T('Every letter tile dances','כל אות רוקדת')],['gold','👑',T('Golden logo','לוגו זהב'),T('For those who know','למי שיודע')]];
@@ -2959,4 +2968,126 @@ setInterval(updates,3000);updates();
 </script><script>
 (function(){var b=document.getElementById('musb');if(!b)return;function draw(){var on=SFX.musicOn();b.textContent=on?'🎵':'🎵̸';b.classList.toggle('off',!on);b.setAttribute('aria-label',on?'Music on':'Music off')}
 b.onclick=function(e){e.stopPropagation();SFX.music(!SFX.musicOn());draw()};draw()})();
+</script><script>
+/* Letter Rush: credits (5 free games per game per day, then credits that work in every game), a DEMO store
+   (test purchases, no real money), a judge code, the Letter Rush win streak, and play stats. Stored on the phone. */
+(function(){
+  var HE=false;try{HE=localStorage.getItem('lr-lang')==='he'}catch(e){}
+  function T(e,h){return HE?h:e}
+  function L(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function S(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function J(k,d){try{var v=JSON.parse(L(k));return v==null?d:v}catch(e){return d}}
+  function day(t){var d=t?new Date(t):new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+  var FREE=5,NAMES={rush:T('Letter Rush','מרוץ אותיות'),wh:T('Word Hunt','ציד מילים'),hm:T('Hangman','איש תלוי'),imp:T('Imposter','מתחזה')};
+  var PACKS=[[10,'₪1.99',''],[30,'₪4.99',T('Popular','הכי פופולרי')],[100,'₪12.99',T('Best value','הכי משתלם')]];
+  var JUDGE='JUDGE';
+  function usedToday(){var u=J('lr-pay',{});if(u.d!==day())u={d:day(),used:{}};return u}
+  function credits(){return Math.max(0,+L('lr-credits')||0)}
+  function unlimited(){return L('lr-unlimited')==='1'}
+  function left(g){return Math.max(0,FREE-(usedToday().used[g]||0))}
+  function can(g){return unlimited()||left(g)>0||credits()>0}
+  function stat(g){S('lr-stat-'+g,(+L('lr-stat-'+g)||0)+1)}
+  function use(g){
+    if(unlimited()){stat(g);return true}
+    var u=usedToday();if((u.used[g]||0)<FREE){u.used[g]=(u.used[g]||0)+1;S('lr-pay',JSON.stringify(u));stat(g);return true}
+    var c=credits();if(c>0){S('lr-credits',c-1);stat(g);return true}
+    return false;
+  }
+  function css(){
+    if(document.getElementById('lrpay-css'))return;var s=document.createElement('style');s.id='lrpay-css';
+    s.textContent='.lrstore{position:fixed;inset:0;z-index:9997;display:grid;place-items:end center;background:rgba(10,8,40,.5);padding:0}'+
+      '.lrstore .sheet{width:min(480px,100%);max-height:92vh;overflow:auto;background:var(--card,#fff);color:var(--ink,#1d1b4b);border-radius:26px 26px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;animation:lrup .4s cubic-bezier(.34,1.56,.64,1)}'+
+      '@keyframes lrup{from{transform:translateY(100%)}}'+
+      '.lrstore h3{margin:0;font-size:1.4rem;text-align:center}.lrstore p{margin:0;text-align:center;color:var(--mute,#666);font-weight:600}'+
+      '.lrstore .coins{font-size:2.4rem;text-align:center;font-weight:800}'+
+      '.lrstore .pack{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-radius:18px;border:2px solid var(--line,#ddd);background:var(--tile,#f6f6ff);color:var(--ink,#1d1b4b);font-weight:800;font-size:1.1rem;box-shadow:0 4px 0 var(--line,#ddd);animation:none;width:100%}'+
+      '.lrstore .pack em{font-style:normal;background:#ffcf3a;color:#5a3d00;padding:6px 14px;border-radius:999px;box-shadow:0 3px 0 #c99a06}'+
+      '.lrstore .pack small{display:block;font-size:.75rem;color:#20b26c}'+
+      '.lrstore .test{font-size:.8rem;text-align:center;color:var(--mute,#777);font-weight:600}'+
+      '.lrstore .row{display:flex;gap:8px}.lrstore input{flex:1;min-width:0;text-transform:uppercase}'+
+      '.lrstore .free{display:grid;grid-template-columns:1fr 1fr;gap:6px}.lrstore .free span{padding:8px 10px;border-radius:12px;background:var(--tile,#f6f6ff);font-weight:700;font-size:.85rem;text-align:center}';
+    document.head.appendChild(s);
+  }
+  function store(g,after){
+    css();var old=document.querySelector('.lrstore');if(old)old.remove();
+    var d=document.createElement('div');d.className='lrstore';
+    function draw(msg){
+      var out=g&&!can(g),u=unlimited();
+      d.innerHTML='<div class="sheet">'+
+        '<h3>'+(out?T('Out of free games for today','נגמרו המשחקים החינמיים להיום'):T('Store','חנות'))+'</h3>'+
+        (out?'<p>'+T('You played your 5 free '+NAMES[g]+' games today. Credits work in every game.','שיחקתם את 5 המשחקים החינמיים ב'+NAMES[g]+' היום. קרדיטים עובדים בכל המשחקים.')+'</p>':'')+
+        '<div class="coins">🪙 '+(u?'∞':credits())+'</div>'+
+        '<div class="free">'+Object.keys(NAMES).map(function(k){return '<span>'+NAMES[k]+': '+(u?'∞':left(k)+'/'+FREE)+'</span>'}).join('')+'</div>'+
+        '<p>'+T('Free games every day: 5 per game. 1 credit = 1 more game.','משחקים חינם כל יום: 5 לכל משחק. קרדיט אחד = משחק נוסף.')+'</p>'+
+        PACKS.map(function(p,i){return '<button class="pack" data-i="'+i+'"><span>🪙 '+p[0]+' '+T('credits','קרדיטים')+(p[2]?'<small>'+p[2]+'</small>':'')+'</span><em>'+p[1]+'</em></button>'}).join('')+
+        '<p class="test">'+T('Demo store: test purchases only, no real money is charged.','חנות לדוגמה: רכישות ניסיון בלבד, לא מחויב כסף אמיתי.')+'</p>'+
+        '<div class="row"><input class="lrcode" placeholder="'+T('Have a code?','יש לכם קוד?')+'" maxlength="16" autocomplete="off"><button class="alt lrcodeb" style="width:auto">'+T('Use','הפעלה')+'</button></div>'+
+        (msg?'<p class="msg" style="color:#20b26c">'+msg+'</p>':'')+
+        (out&&!can(g)?'':(after?'<button class="lrplay">'+T('Play','שחקו')+'</button>':''))+
+        '<button class="alt lrclose">'+T('Close','סגירה')+'</button></div>';
+      [].forEach.call(d.querySelectorAll('.pack'),function(b){b.onclick=function(){
+        var p=PACKS[+b.dataset.i];
+        lrConfirm(T('Test purchase: add '+p[0]+' credits for '+p[1]+'? No real money is charged.','רכישת ניסיון: להוסיף '+p[0]+' קרדיטים ב-'+p[1]+'? לא מחויב כסף אמיתי.'),T('Buy (test)','קנייה (ניסיון)'),T('Cancel','ביטול'),function(){
+          S('lr-credits',credits()+p[0]);try{SFX.play('crown')}catch(e){}draw(T('+'+p[0]+' credits added','נוספו '+p[0]+' קרדיטים'))});
+      }});
+      d.querySelector('.lrcodeb').onclick=function(){var v=(d.querySelector('.lrcode').value||'').trim().toUpperCase();
+        if(v===JUDGE){S('lr-unlimited','1');try{SFX.play('crown')}catch(e){}draw(T('Unlimited play unlocked','משחק ללא הגבלה נפתח'))}else draw(T('That code doesn’t work','הקוד לא עובד'))};
+      var pl=d.querySelector('.lrplay');if(pl)pl.onclick=function(){if(use(g)){d.remove();after()}};
+      d.querySelector('.lrclose').onclick=function(){d.remove()};
+    }
+    d.onclick=function(e){if(e.target===d)d.remove()};
+    draw();document.body.appendChild(d);
+  }
+  // run f now if a free game or a credit is available; otherwise open the store (and run f after buying)
+  function gate(g,f){if(use(g)){f();return true}store(g,f);try{SFX.play('wrong')}catch(e){}return false}
+
+  /* Letter Rush win streak: one win a day keeps it alive */
+  function streak(){var s=J('lr-wst',{n:0,best:0,d:''});var y=day(Date.now()-864e5);return {n:s.d===day()||s.d===y?s.n:0,best:s.best||0,today:s.d===day(),d:s.d}}
+  function win(){
+    var s=J('lr-wst',{n:0,best:0,d:''}),t=day(),y=day(Date.now()-864e5);
+    if(s.d===t)return false;
+    s.n=s.d===y?s.n+1:1;s.d=t;s.best=Math.max(s.best||0,s.n);S('lr-wst',JSON.stringify(s));sync();
+    try{if(window.ACH)ACH.mark('streak')}catch(e){}
+    return s.n;
+  }
+  function sync(){try{if(window.Android&&Android.setStreak){var s=streak();Android.setStreak(s.n,s.d||'',HE?'he':'en');if(s.n>0&&Android.askNotify)Android.askNotify()}}catch(e){}}
+  window.PAY={use:use,can:can,gate:gate,store:store,left:left,credits:credits,unlimited:unlimited,FREE:FREE,NAMES:NAMES,streak:streak,win:win,sync:sync,day:day,T:T};
+  sync();
+})();
+
+</script>
+<script>
+(function(){
+var T=PAY.T;
+function st(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function n(k){return Math.max(+st(k)||0,+st(k+'-he')||0)}
+function bw(g){var w=0,l=0;[0,1,2,3].forEach(function(v){['','-he'].forEach(function(s){try{var r=JSON.parse(st('lr-bot-'+g+'-'+v+s)||'null');if(r){w+=r[0]||0;l+=r[1]||0}}catch(e){}})});return w+'–'+l}
+function maxp(p){var m=0;try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(p)===0)m=Math.max(m,+localStorage.getItem(k)||0)}}catch(e){}return m}
+function card(t,cells,i){return '<div class="stc" style="animation-delay:'+(i*60)+'ms"><h4>'+t+'</h4><div class="stg">'+cells.map(function(c){return '<div><b>'+c[1]+'</b><small>'+c[0]+'</small></div>'}).join('')+'</div></div>'}
+function stats(){
+  var s=PAY.streak(),wins=0;try{wins=JSON.parse(st('lr-achw')||'[]').length}catch(e){}
+  $('trt').textContent='';
+  $('stlist').innerHTML='<div class="sthead"><big>👑</big><span>'+T('Level ','רמה ')+ACH.level()+' · '+ACH.xp()+' XP<br><small style="font-weight:600;color:var(--mute)">'+T('Achievements: ','הישגים: ')+Object.keys(ACH.got()).length+' / '+ACH.DEF.length+'</small></span></div>'+
+    card('🔥 '+T('Letter Rush win streak','רצף ניצחונות במרוץ אותיות'),[[T('Days now','ימים עכשיו'),s.n],[T('Best','שיא'),s.best],[T('Today','היום'),s.today?'✅':'—']],0)+
+    card('🔠 '+T('Letter Rush','מרוץ אותיות'),[[T('Games','משחקים'),n('lr-stat-rush')],[T('Words solved','מילים שנפתרו'),n('lr-solved')],[T('Best score','שיא'),maxp('lr-b-')],[T('vs bots','נגד בוטים'),bw('rush')],[T('Online wins','ניצחונות אונליין'),wins],[T('Daily streak','רצף יומי'),(function(){var m=0;['lr-ds','lr-ds-he'].forEach(function(k){try{var x=JSON.parse(st(k)||'null');if(x)m=Math.max(m,x.n||0)}catch(e){}});return m})()]],1)+
+    card('🔍 '+T('Word Hunt','ציד מילים'),[[T('Games','משחקים'),n('lr-stat-wh')],[T('Classic best','שיא קלאסי'),n('lr-wh-best')],[T('Blitz best','שיא בליץ'),n('lr-wh-best-blitz')],[T('vs bots','נגד בוטים'),bw('wh')],[T('Zen best','שיא זן'),n('lr-wh-best-zen')],[T('Dailies','יומיים'),(function(){var c=0;try{for(var i=0;i<localStorage.length;i++)if(localStorage.key(i).indexOf('lr-whd-')===0)c++}catch(e){}return c})()]],2)+
+    card('🪢 '+T('Hangman','איש תלוי'),[[T('Games','משחקים'),n('lr-stat-hm')],[T('Classic best','שיא קלאסי'),n('lr-hm-best')],[T('Blitz best','שיא בליץ'),n('lr-hm-best-blitz')],[T('vs bots','נגד בוטים'),bw('hm')],[T('Zen best','שיא זן'),n('lr-hm-best-zen')],[T('Flawless','בלי טעויות'),ACH.got().hmflaw?'✅':'—']],3)+
+    card('🕵️ '+T('Imposter','מתחזה'),[[T('Rounds dealt','סיבובים'),n('lr-stat-imp')],[T('Crew wins','ניצחונות צוות'),ACH.got().impc?'✅':'—'],[T('Imposter wins','ניצחונות מתחזה'),ACH.got().impi?'✅':'—']],4)+
+    card('🪙 '+T('Credits','קרדיטים'),[[T('Credits','קרדיטים'),PAY.unlimited()?'∞':PAY.credits()],[T('Free today','חינם היום'),PAY.unlimited()?'∞':['rush','wh','hm','imp'].reduce(function(a,g){return a+PAY.left(g)},0)+'/'+(PAY.FREE*4)],[T('Store','חנות'),'🛒']],5);
+  var last=$('stlist').lastElementChild;last.style.cursor='pointer';last.onclick=function(){PAY.store(null,null)};
+}
+function tab(which){$('tabS').classList.toggle('on',which==='s');$('tabA').classList.toggle('on',which==='a');
+  $('stlist').classList.toggle('hide',which!=='s');$('trlist').classList.toggle('hide',which!=='a');$('trsum').classList.toggle('hide',which!=='a');$('trt').classList.toggle('hide',which!=='a');
+  if(which==='s')stats();else $('trophy').dataset.a='1'}
+$('tabS').textContent='📊 '+T('Stats','סטטיסטיקה');$('tabA').textContent='🏆 '+T('Achievements','הישגים');
+$('tabS').onclick=function(){tab('s')};$('tabA').onclick=function(){var f=$('trophy').onclick;tab('a');$('trt').textContent=T('Achievements','הישגים');
+  // reuse the achievements list renderer from the menu script
+  try{window.lrTrophies&&window.lrTrophies()}catch(e){}};
+var old=$('trophy').onclick;
+$('trophy').onclick=function(){try{SFX.play('click')}catch(e){}old&&old();tab('s');view('trophyv')};
+$('lvlb').onclick=$('trophy').onclick;
+$('coinb').onclick=function(){try{SFX.play('click')}catch(e){}PAY.store(null,null)};
+function hud2(){$('coinc').textContent=PAY.unlimited()?'∞':PAY.credits();var s=PAY.streak();var x=$('lvlx');if(x&&s.n>0&&x.textContent.indexOf('🔥')<0)x.textContent+=' · 🔥 '+s.n}
+hud2();setInterval(hud2,2000);
+})();
 </script></body></html>

@@ -298,6 +298,14 @@ b{font-weight:700}.card>b:first-child{font-size:1.2rem}
 #mmFriend.bigb{background:#20b26c;box-shadow:0 6px 0 #13814c}#mmFriend.bigb:active{box-shadow:0 1px 0 #13814c}
 #mmhostv .qr{width:min(200px,58vw)}
 #musb.off{opacity:.45}
+
+.smchips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.smchips button{width:auto;padding:8px 16px;border-radius:999px;font-size:.95rem;background:var(--line);color:var(--mute);box-shadow:none;animation:none}
+.smchips button.on{background:var(--acc);color:#fff;box-shadow:0 4px 0 color-mix(in srgb,var(--acc) 60%,#000)}
+.lrdef{margin:8px auto 0;max-width:420px;padding:10px 14px;border-radius:14px;background:var(--tile);border:2px solid var(--line);font-size:.92rem;line-height:1.35;text-align:start;animation:rise .4s var(--spring) both;unicode-bidi:plaintext}
+.lrdef i{color:var(--mute)}
+.lrdefpop{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:9996;width:min(92vw,420px)}
+#hmhint{width:auto;margin:4px auto 0;padding:8px 18px;display:block}
 </style></head><body><main>
 <header><h1 class="logo" aria-label="Letter Rush"><span>L</span><span>E</span><span>T</span><span class="r">T</span><span>E</span><span>R</span><span class="sp"></span><span>R</span><span>U</span><span class="r">S</span><span>H</span></h1><div style="display:flex;gap:8px"><button class="ib" id="helpb" aria-label="How to play">?</button><button id="musb" class="ib" aria-label="Music">🎵</button><button class="ib" id="snd" aria-label="Sound">🔊</button><button id="theme" aria-label="Light or dark">🌙</button></div></header>
 
@@ -3232,14 +3240,14 @@ async function mmLeave(){
 }
 
 /* ===== SOLO MODES ===== */
-const MODES=[['classic','Classic','Rising difficulty · 3 lives'],['blitz','Blitz','60 seconds · solve fast, earn time'],['daily','Daily','5 words, same for everyone today'],['zen','Zen','No timer · free hints']];
+const MODES=[['classic','Classic','Rising difficulty · 3 lives'],['blitz','Blitz','60 seconds · solve fast, earn time'],['daily','Daily','5 long words (8–12 letters), same for everyone'],['zen','Zen','No timer · free hints']];
 let sm='classic',sSeed='',sRound=1,sScore=0,sStreak=0,sLives=3,sHints=2,sSolved=0,sDL=0,sT0=0,sMs=0,sRes=[],banked=false;
 const tierT=n=>n<=4?30:n<=6?35:n===7?40:45;
 const utc=(d=new Date())=>d.toISOString().slice(0,10);
 const yday=()=>utc(new Date(Date.now()-864e5));
 function dailyStreak(){const s=JSON.parse(st('lr-ds')||'null');return s&&(s.d===utc()||s.d===yday())?s.n:0}
 function bumpStreak(){const s=JSON.parse(st('lr-ds')||'null');if(s&&s.d===utc())return;sv('lr-ds',JSON.stringify({d:utc(),n:s&&s.d===yday()?s.n+1:1}))}
-function lenOf(r){return sm==='classic'?Math.min(3+Math.floor((r-1)/2),10):sm==='blitz'?Math.min(3+Math.floor((r-1)/3),8):sm==='daily'?[3,4,5,6,7][r-1]:4+Math.floor(rng(hash(sSeed+'L'+r))()*5)}
+function lenOf(r){return sm==='classic'?Math.min(3+Math.floor((r-1)/2),10):sm==='blitz'?Math.min(3+Math.floor((r-1)/3),8):sm==='daily'?[8,9,10,11,12][r-1]:4+Math.floor(rng(hash(sSeed+'L'+r))()*5)}
 $('snd').textContent=snd?'🔊':'🔇';
 $('snd').onclick=()=>{snd=!snd;sv('lr-snd',snd?'1':'0');$('snd').textContent=snd?'🔊':'🔇'};
 (function(){const b=$('hex');for(let i=0;i<5;i++){const d=document.createElement('div');d.className='sq'+(i===2?' hl':'');if(i===2)d.textContent='A';b.appendChild(d)}})();
@@ -3281,6 +3289,7 @@ function soloRound(){
   const n=lenOf(sRound),r=rng(hash(sSeed+':'+sRound));
   curN=n;curHi=Math.floor(r()*n);
   const pool=LANG==='he'?HE_POOL:n<5?'ABCDEFGHILMNOPRSTUWY':'ABCDEFGHIKLMNOPRSTUVWY';letter=pool[Math.floor(r()*pool.length)];
+  for(let k=0;k<80&&sm==='daily'&&!pick();k++){curHi=Math.floor(r()*n);letter=pool[Math.floor(r()*pool.length)]}
   const b=$('board');b.innerHTML='';b.classList.remove('over');
   for(let i=0;i<n;i++){const d=document.createElement('div');d.className='sq'+(i===curHi?' hl':'');if(i===curHi)d.textContent=letter;b.appendChild(d)}
   $('banner').textContent=letter+' in box '+(curHi+1);$('hint').textContent='';
@@ -3440,7 +3449,7 @@ $('whstart').onclick=()=>{
   if(k==='local'&&WH.p1){whPlay({kind:k,grid:WH.grid,player:2,p1:WH.p1});return}
   if(k==='bot'){whStartBot();return}
   const g=k==='daily'?WH_BOARDS[(whDayIndex()*7919)%WH_BOARDS.length]:WH_BOARDS[Math.floor(Math.random()*WH_BOARDS.length)];
-  whPlay({kind:k,grid:g,player:1});
+  whPlay(k==='solo'?{kind:k,grid:g,player:1,sm:WHSM,ms:WHSM==='blitz'?30000:WHSM==='zen'?864e5:80000}:{kind:k,grid:g,player:1});
 };
 
 /* ---------- a round (all modes) ---------- */
@@ -3482,8 +3491,8 @@ function whGo(){
   WH.clock=setInterval(()=>{
     const rem=WH.endAt-Date.now(),s=Math.max(0,Math.ceil(rem/1000));
     if(WH.kind==='bot')whBotTick();
-    $('whclock').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
-    $('whbar').style.width=Math.max(0,rem/WH.ms*100)+'%';
+    $('whclock').textContent=WH.sm==='zen'?'∞':Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+    $('whbar').style.width=WH.sm==='zen'?'100%':Math.min(100,Math.max(0,rem/WH.ms*100))+'%';
     const low=s<=10;$('whclock').classList.toggle('low',low&&s>0);$('whbar').classList.toggle('low',low);
     if(low&&s!==lastSec&&s>0)SFX.play('tick');lastSec=s;
     if(rem<=0){clearInterval(WH.clock);WH.live=false;whEndPath();SFX.play('timeup');whTimeUp()}
@@ -3537,7 +3546,7 @@ whGrid.addEventListener('pointermove',e=>{if(!WH.live||!WH.path.length)return;wh
 ['pointerup','pointercancel','lostpointercapture'].forEach(n=>whGrid.addEventListener(n,()=>{if(WH.path.length)whEndPath()}));
 /* same path logic without a pointer (used by the automated tests) */
 window.whSwipe=function(cells){if(!WH.live)return false;WH.path=[];cells.forEach(i=>whStep(i));const ok=whState(whWord());whEndPath();return ok};
-$('whquit').onclick=()=>{if(WH.kind==='online'){whStop();mmLeave();return}if(WH.fromLobby){whStop();show('wh',false);mLobby();return}whStop();goMenu()};
+$('whquit').onclick=()=>{if(WH.sm==='zen'&&WH.live){clearInterval(WH.clock);WH.live=false;whEndPath();SFX.play('timeup');whTimeUp();return}if(WH.kind==='online'){whStop();mmLeave();return}if(WH.fromLobby){whStop();show('wh',false);mLobby();return}whStop();goMenu()};
 
 /* ---------- results ---------- */
 function whMissedChips(grid,have,max){
@@ -3556,7 +3565,7 @@ function whTimeUp(){
     if(k==='local'&&WH.player===1){whTurnDone(res);return}
     if(k==='local'){whLocalEnd(WH.p1,res);return}
     if(k==='daily'){const r=Object.assign({d:utc()},res);sv('lr-whd-'+utc(),JSON.stringify(r));xp+=Math.round(res.score/20);sv('lr-xp',xp);whDailyDone(r,true);return}
-    const best=+st('lr-wh-best')||0,nb=res.score>best;if(nb)sv('lr-wh-best',res.score);
+    const bk=WH.sm&&WH.sm!=='classic'?'lr-wh-best-'+WH.sm:'lr-wh-best',best=+st(bk)||0,nb=res.score>best;if(nb)sv(bk,res.score);
     xp+=Math.round(res.score/20);sv('lr-xp',xp);
     whShow('whres');
     $('whres').innerHTML='<b>'+(nb&&res.score>0?'New best!':'Time’s up!')+'</b><div class="whbig">'+fmtN(res.score)+'</div>'+
@@ -3735,8 +3744,8 @@ $('hmstart').onclick=()=>{
   const k=HM.kind;
   if(k==='local'){hmLocalStart();return}
   if(k==='bot'){hmStartBot();return}
-  if(k==='daily'){hmPlay({kind:'daily',seq:[HM_WORDS[(whDayIndex()*7919+13)%HM_WORDS.length]]});return}
-  hmPlay({kind:'solo',seq:hmSeq(400)});
+  if(k==='daily'){hmPlay({kind:'daily',seq:[HM_LONG[(whDayIndex()*7919+13)%HM_LONG.length]]});return}
+  hmPlay({kind:HMSM==='classic'?'solo':HMSM,seq:hmSeq(400)});
 };
 function hmStartBot(){const fl=HM.fromLobby;hmPlay({kind:'bot',seq:hmSeq(40),lvl:botLvl,fromLobby:fl})}
 
@@ -3744,12 +3753,12 @@ function hmStartBot(){const fl=HM.fromLobby;hmPlay({kind:'bot',seq:hmSeq(40),lvl
 function hmPlay(o){
   hmStop();
   HM=Object.assign({on:true,live:false,idx:0,score:0,solvedN:0,log:[],q:Promise.resolve(),qGen:0},o);
-  const race=HM.kind==='bot'||HM.kind==='online';
+  const race=HM.kind==='bot'||HM.kind==='online'||HM.kind==='blitz';
   hmShow('hmplay');$('hmmsg').textContent='';
   $('hmn1').textContent=HM.kind==='online'?HM.names[0]:HM.kind==='local'?tr('Player ','שחקן ')+HM.guesser:tr('Score','ניקוד');
-  $('hmn2').textContent=HM.kind==='online'?HM.names[1]:HM.kind==='bot'?tr('Bot','בוט')+' · '+BOTS[HM.lvl].n:HM.kind==='solo'?tr('Best','שיא'):HM.kind==='local'?tr('Player ','שחקן ')+(3-HM.guesser):'';
-  $('hms1').textContent='0';$('hms2').textContent=HM.kind==='solo'?fmtN(+st('lr-hm-best')||0):HM.kind==='local'&&HM.prev?fmtN(HM.prev.points):race?'0':'';
-  $('hmclock').textContent=race?'1:40':'';$('hmclock').classList.remove('low');show('hmbar',race);$('hmbar').style.width='100%';$('hmbar').classList.remove('low');
+  $('hmn2').textContent=HM.kind==='online'?HM.names[1]:HM.kind==='bot'?tr('Bot','בוט')+' · '+BOTS[HM.lvl].n:(HM.kind==='solo'||HM.kind==='blitz'||HM.kind==='zen')?tr('Best','שיא'):HM.kind==='local'?tr('Player ','שחקן ')+(3-HM.guesser):'';
+  $('hms1').textContent='0';$('hms2').textContent=(HM.kind==='solo'||HM.kind==='blitz'||HM.kind==='zen')?fmtN(+st(hmBestKey())||0):HM.kind==='local'&&HM.prev?fmtN(HM.prev.points):race?'0':'';
+  $('hmclock').textContent=race?(HM.kind==='blitz'?'1:00':'1:40'):HM.kind==='zen'?'∞':'';$('hmclock').classList.remove('low');show('hmbar',race);$('hmbar').style.width='100%';$('hmbar').classList.remove('low');
   $('hmquit').textContent=HM.kind==='online'?tr('Leave match','יציאה מהמשחק'):tr('Leave','יציאה');
   hmBuildKb();
   if(HM.kind==='online'){hmSetWord('',[],0);return}
@@ -3796,7 +3805,7 @@ function hmCountdown(ms){
 }
 async function hmGo(){
   if(!HM.on)return;
-  const race=HM.kind==='bot'||HM.kind==='online';
+  const race=HM.kind==='bot'||HM.kind==='online'||HM.kind==='blitz';
   if(race){whBig('GO!','go');beep(660)}
   if(HM.kind==='online'){
     try{let s=await Net.hmState(HM.mid);for(let k=0;k<5&&s.pattern==null&&s.wait_ms!=null;k++){await new Promise(r=>setTimeout(r,s.wait_ms+80));if(!HM.on)return;s=await Net.hmState(HM.mid)}if(s.pattern!=null){HM.idx=s.idx;HM.score=s.score||0;$('hms1').textContent=fmtN(HM.score);hmSetWord(fromT(s.pattern),[...fromT(s.guessed||'')],s.misses)}}
@@ -3804,12 +3813,12 @@ async function hmGo(){
   }
   HM.live=true;hmKeys();
   if(!race)return;
-  if(!HM.endAt)HM.endAt=Date.now()+HM_RACE;
+  if(!HM.endAt)HM.endAt=Date.now()+(HM.kind==='blitz'?60000:HM_RACE);
   clearInterval(HM.clock);let lastSec=99;
   HM.clock=setInterval(()=>{
     const rem=HM.endAt-Date.now(),s=Math.max(0,Math.ceil(rem/1000));
     $('hmclock').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
-    $('hmbar').style.width=Math.max(0,rem/HM_RACE*100)+'%';
+    $('hmbar').style.width=Math.max(0,rem/(HM.kind==='blitz'?60000:HM_RACE)*100)+'%';
     const low=s<=10;$('hmclock').classList.toggle('low',low&&s>0);$('hmbar').classList.toggle('low',low);
     if(low&&s!==lastSec&&s>0)SFX.play('tick');lastSec=s;
     if(rem<=0){clearInterval(HM.clock);HM.live=false;hmKeys();SFX.play('timeup');hmTimeUp()}
@@ -3827,7 +3836,7 @@ function hmGuess(c){
   else{HM.misses++;SFX.play('drop',0);try{navigator.vibrate&&navigator.vibrate(25)}catch(e){}hmFig(HM.misses,'')}
   hmKeys();
   if([...HM.word].every(x=>HM.gset.has(x)))hmDone('solved',HM.word,hmPts(HM.word.length,HM.misses));
-  else if(HM.misses>=HM_LIVES)hmDone('hanged',HM.word,0);
+  else if(HM.misses>=HM_LIVES&&HM.kind!=='zen')hmDone('hanged',HM.word,0);
 }
 function hmDone(how,word,pts){
   HM.busyWord=true;HM.log.push({word,solved:how==='solved',misses:HM.misses,points:pts});
@@ -3845,6 +3854,7 @@ function hmDone(how,word,pts){
   HM.nextT=setTimeout(()=>{
     if(HM!==g||!HM.on)return;HM.busyWord=false;
     if(k==='solo'){if(how==='hanged'){hmSoloEnd(word);return}HM.idx++;hmNewWord();return}
+    if(k==='zen'){HM.idx++;hmNewWord();return}
     if(k==='daily'){hmDailyEnd(how==='solved',word);return}
     if(k==='local'){hmLocalTurnEnd(how==='solved',word,pts);return}
     if(!HM.live)return;
@@ -3857,7 +3867,7 @@ document.addEventListener('keydown',e=>{
   if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
   const c=hmNorm(e.key);if(c){e.preventDefault();hmGuess(c)}
 });
-$('hmquit').onclick=()=>{if(HM.kind==='online'){hmStop();mmLeave();return}hmStop();goMenu()};
+$('hmquit').onclick=()=>{if(HM.kind==='zen'&&HM.on){hmModeEnd('zen');return}if(HM.kind==='online'){hmStop();mmLeave();return}hmStop();goMenu()};
 
 /* ---------- Solo ---------- */
 function hmSoloEnd(lastWord){
@@ -3947,6 +3957,7 @@ function hmOpp(score,pts){
   if(pts>0){const f=document.createElement('div');f.className='hmopp';f.textContent='+'+fmtN(pts);$('hmstage').appendChild(f);setTimeout(()=>f.remove(),950);SFX.play('opp')}
 }
 function hmTimeUp(){
+  if(HM.kind==='blitz'){hmModeEnd('blitz');return}
   if(HM.kind==='online'){setTimeout(()=>{if(M&&!M.ended)Net.beat(M.id).then(applyM,()=>{})},2300);return}
   const me=HM.score,bt=HM.bot.score,res=me>bt?'w':me<bt?'l':'d',rec=botRecord('hm',HM.lvl,res),lvl=HM.lvl,fl=HM.fromLobby;
   const mine=HM.log,theirs=HM.bot.log;hmStop();
@@ -4520,7 +4531,7 @@ const SFX=(()=>{
     'Server':'שרת','Save':'שמירה','Server settings':'הגדרות שרת','Pick a name and play':'בחרו שם ושחקו','Choose a username':'בחרו שם משתמש',
     'Let’s go!':'יאללה!','Continue with Google':'המשך עם Google','Use email and password':'כניסה עם אימייל וסיסמה','Email':'אימייל',
     'Password':'סיסמה','Username (new account)':'שם משתמש (חשבון חדש)','Sign in':'כניסה','Create account':'יצירת חשבון',
-    'Play ranked':'משחק מדורג','⚡ Quick match':'⚡ משחק מהיר','🤝 Play a friend':'🤝 שחקו עם חבר','Imposter':'מתחזה','Find who doesn’t know the word':'גלו מי לא יודע את המילה','One phone':'טלפון אחד','Pass one phone around':'מעבירים טלפון אחד','Several phones':'כמה טלפונים','Everyone on their own phone':'כל אחד בטלפון שלו','🕵️ You’re invited to Imposter!':'🕵️ הוזמנתם למשחק מתחזה!','Play a friend':'שחקו עם חבר','Leaderboard':'טבלת מובילים','Save account with Google':'שמירת החשבון עם Google',
+    'Play ranked':'משחק מדורג','Classic, Blitz or Zen':'קלאסי, בליץ או זן','5 long words (8–12 letters), same for everyone':'5 מילים ארוכות (8–12 אותיות), זהות לכולם','⚡ Quick match':'⚡ משחק מהיר','🤝 Play a friend':'🤝 שחקו עם חבר','Imposter':'מתחזה','Find who doesn’t know the word':'גלו מי לא יודע את המילה','One phone':'טלפון אחד','Pass one phone around':'מעבירים טלפון אחד','Several phones':'כמה טלפונים','Everyone on their own phone':'כל אחד בטלפון שלו','🕵️ You’re invited to Imposter!':'🕵️ הוזמנתם למשחק מתחזה!','Play a friend':'שחקו עם חבר','Leaderboard':'טבלת מובילים','Save account with Google':'שמירת החשבון עם Google',
     'Sign out':'התנתקות','Create room':'יצירת חדר','or join your friend’s room':'או הצטרפו לחדר של חבר','CODE':'קוד','Join':'הצטרפות',
     'Your room code':'קוד החדר שלכם','Copy code':'העתקת קוד','Copied':'הועתק','Copy link':'העתקת קישור','Link copied':'הקישור הועתק','Scan with any phone camera to play. No app needed.':'סרקו עם המצלמה של כל טלפון ושחקו. בלי להתקין כלום.','⚔️ You’ve been challenged!':'⚔️ הזמינו אתכם לקרב!','Pick a name and tap Let’s go.':'בחרו שם ולחצו יאללה!','Or scan to play in the browser, no app needed':'או סרקו ושחקו בדפדפן, בלי אפליקציה','Change username':'שינוי שם משתמש',
     'Sign out of a guest account?':'להתנתק מחשבון אורח?',
@@ -4820,4 +4831,197 @@ window.lrAddXp=function(n){try{xp+=n}catch(e){}};
 </script><script>
 (function(){var b=document.getElementById('musb');if(!b)return;function draw(){var on=SFX.musicOn();b.textContent=on?'🎵':'🎵̸';b.classList.toggle('off',!on);b.setAttribute('aria-label',on?'Music on':'Music off')}
 b.onclick=function(e){e.stopPropagation();SFX.music(!SFX.musicOn());draw()};draw()})();
+</script><script>
+/* Letter Rush: credits (5 free games per game per day, then credits that work in every game), a DEMO store
+   (test purchases, no real money), a judge code, the Letter Rush win streak, and play stats. Stored on the phone. */
+(function(){
+  var HE=false;try{HE=localStorage.getItem('lr-lang')==='he'}catch(e){}
+  function T(e,h){return HE?h:e}
+  function L(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function S(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function J(k,d){try{var v=JSON.parse(L(k));return v==null?d:v}catch(e){return d}}
+  function day(t){var d=t?new Date(t):new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+  var FREE=5,NAMES={rush:T('Letter Rush','מרוץ אותיות'),wh:T('Word Hunt','ציד מילים'),hm:T('Hangman','איש תלוי'),imp:T('Imposter','מתחזה')};
+  var PACKS=[[10,'₪1.99',''],[30,'₪4.99',T('Popular','הכי פופולרי')],[100,'₪12.99',T('Best value','הכי משתלם')]];
+  var JUDGE='JUDGE';
+  function usedToday(){var u=J('lr-pay',{});if(u.d!==day())u={d:day(),used:{}};return u}
+  function credits(){return Math.max(0,+L('lr-credits')||0)}
+  function unlimited(){return L('lr-unlimited')==='1'}
+  function left(g){return Math.max(0,FREE-(usedToday().used[g]||0))}
+  function can(g){return unlimited()||left(g)>0||credits()>0}
+  function stat(g){S('lr-stat-'+g,(+L('lr-stat-'+g)||0)+1)}
+  function use(g){
+    if(unlimited()){stat(g);return true}
+    var u=usedToday();if((u.used[g]||0)<FREE){u.used[g]=(u.used[g]||0)+1;S('lr-pay',JSON.stringify(u));stat(g);return true}
+    var c=credits();if(c>0){S('lr-credits',c-1);stat(g);return true}
+    return false;
+  }
+  function css(){
+    if(document.getElementById('lrpay-css'))return;var s=document.createElement('style');s.id='lrpay-css';
+    s.textContent='.lrstore{position:fixed;inset:0;z-index:9997;display:grid;place-items:end center;background:rgba(10,8,40,.5);padding:0}'+
+      '.lrstore .sheet{width:min(480px,100%);max-height:92vh;overflow:auto;background:var(--card,#fff);color:var(--ink,#1d1b4b);border-radius:26px 26px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;animation:lrup .4s cubic-bezier(.34,1.56,.64,1)}'+
+      '@keyframes lrup{from{transform:translateY(100%)}}'+
+      '.lrstore h3{margin:0;font-size:1.4rem;text-align:center}.lrstore p{margin:0;text-align:center;color:var(--mute,#666);font-weight:600}'+
+      '.lrstore .coins{font-size:2.4rem;text-align:center;font-weight:800}'+
+      '.lrstore .pack{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-radius:18px;border:2px solid var(--line,#ddd);background:var(--tile,#f6f6ff);color:var(--ink,#1d1b4b);font-weight:800;font-size:1.1rem;box-shadow:0 4px 0 var(--line,#ddd);animation:none;width:100%}'+
+      '.lrstore .pack em{font-style:normal;background:#ffcf3a;color:#5a3d00;padding:6px 14px;border-radius:999px;box-shadow:0 3px 0 #c99a06}'+
+      '.lrstore .pack small{display:block;font-size:.75rem;color:#20b26c}'+
+      '.lrstore .test{font-size:.8rem;text-align:center;color:var(--mute,#777);font-weight:600}'+
+      '.lrstore .row{display:flex;gap:8px}.lrstore input{flex:1;min-width:0;text-transform:uppercase}'+
+      '.lrstore .free{display:grid;grid-template-columns:1fr 1fr;gap:6px}.lrstore .free span{padding:8px 10px;border-radius:12px;background:var(--tile,#f6f6ff);font-weight:700;font-size:.85rem;text-align:center}';
+    document.head.appendChild(s);
+  }
+  function store(g,after){
+    css();var old=document.querySelector('.lrstore');if(old)old.remove();
+    var d=document.createElement('div');d.className='lrstore';
+    function draw(msg){
+      var out=g&&!can(g),u=unlimited();
+      d.innerHTML='<div class="sheet">'+
+        '<h3>'+(out?T('Out of free games for today','נגמרו המשחקים החינמיים להיום'):T('Store','חנות'))+'</h3>'+
+        (out?'<p>'+T('You played your 5 free '+NAMES[g]+' games today. Credits work in every game.','שיחקתם את 5 המשחקים החינמיים ב'+NAMES[g]+' היום. קרדיטים עובדים בכל המשחקים.')+'</p>':'')+
+        '<div class="coins">🪙 '+(u?'∞':credits())+'</div>'+
+        '<div class="free">'+Object.keys(NAMES).map(function(k){return '<span>'+NAMES[k]+': '+(u?'∞':left(k)+'/'+FREE)+'</span>'}).join('')+'</div>'+
+        '<p>'+T('Free games every day: 5 per game. 1 credit = 1 more game.','משחקים חינם כל יום: 5 לכל משחק. קרדיט אחד = משחק נוסף.')+'</p>'+
+        PACKS.map(function(p,i){return '<button class="pack" data-i="'+i+'"><span>🪙 '+p[0]+' '+T('credits','קרדיטים')+(p[2]?'<small>'+p[2]+'</small>':'')+'</span><em>'+p[1]+'</em></button>'}).join('')+
+        '<p class="test">'+T('Demo store: test purchases only, no real money is charged.','חנות לדוגמה: רכישות ניסיון בלבד, לא מחויב כסף אמיתי.')+'</p>'+
+        '<div class="row"><input class="lrcode" placeholder="'+T('Have a code?','יש לכם קוד?')+'" maxlength="16" autocomplete="off"><button class="alt lrcodeb" style="width:auto">'+T('Use','הפעלה')+'</button></div>'+
+        (msg?'<p class="msg" style="color:#20b26c">'+msg+'</p>':'')+
+        (out&&!can(g)?'':(after?'<button class="lrplay">'+T('Play','שחקו')+'</button>':''))+
+        '<button class="alt lrclose">'+T('Close','סגירה')+'</button></div>';
+      [].forEach.call(d.querySelectorAll('.pack'),function(b){b.onclick=function(){
+        var p=PACKS[+b.dataset.i];
+        lrConfirm(T('Test purchase: add '+p[0]+' credits for '+p[1]+'? No real money is charged.','רכישת ניסיון: להוסיף '+p[0]+' קרדיטים ב-'+p[1]+'? לא מחויב כסף אמיתי.'),T('Buy (test)','קנייה (ניסיון)'),T('Cancel','ביטול'),function(){
+          S('lr-credits',credits()+p[0]);try{SFX.play('crown')}catch(e){}draw(T('+'+p[0]+' credits added','נוספו '+p[0]+' קרדיטים'))});
+      }});
+      d.querySelector('.lrcodeb').onclick=function(){var v=(d.querySelector('.lrcode').value||'').trim().toUpperCase();
+        if(v===JUDGE){S('lr-unlimited','1');try{SFX.play('crown')}catch(e){}draw(T('Unlimited play unlocked','משחק ללא הגבלה נפתח'))}else draw(T('That code doesn’t work','הקוד לא עובד'))};
+      var pl=d.querySelector('.lrplay');if(pl)pl.onclick=function(){if(use(g)){d.remove();after()}};
+      d.querySelector('.lrclose').onclick=function(){d.remove()};
+    }
+    d.onclick=function(e){if(e.target===d)d.remove()};
+    draw();document.body.appendChild(d);
+  }
+  // run f now if a free game or a credit is available; otherwise open the store (and run f after buying)
+  function gate(g,f){if(use(g)){f();return true}store(g,f);try{SFX.play('wrong')}catch(e){}return false}
+
+  /* Letter Rush win streak: one win a day keeps it alive */
+  function streak(){var s=J('lr-wst',{n:0,best:0,d:''});var y=day(Date.now()-864e5);return {n:s.d===day()||s.d===y?s.n:0,best:s.best||0,today:s.d===day(),d:s.d}}
+  function win(){
+    var s=J('lr-wst',{n:0,best:0,d:''}),t=day(),y=day(Date.now()-864e5);
+    if(s.d===t)return false;
+    s.n=s.d===y?s.n+1:1;s.d=t;s.best=Math.max(s.best||0,s.n);S('lr-wst',JSON.stringify(s));sync();
+    try{if(window.ACH)ACH.mark('streak')}catch(e){}
+    return s.n;
+  }
+  function sync(){try{if(window.Android&&Android.setStreak){var s=streak();Android.setStreak(s.n,s.d||'',HE?'he':'en');if(s.n>0&&Android.askNotify)Android.askNotify()}}catch(e){}}
+  window.PAY={use:use,can:can,gate:gate,store:store,left:left,credits:credits,unlimited:unlimited,FREE:FREE,NAMES:NAMES,streak:streak,win:win,sync:sync,day:day,T:T};
+  sync();
+})();
+
+</script>
+<script>
+/* ===== 1.0 extras: modes, long dailies, credits, streak, definitions ===== */
+const HM_LONG=LANG==='he'?["אלקטרוני", "אפשרויות", "אוניברסיטת", "משמעותית", "ניגודיות", "טלוויזיה", "היסטוריה", "קטגוריות", "פרויקטימ", "פעילויות", "מקצועיימ", "מעוניינימ", "אטרקציות", "סטודנטימ", "אפליקציות", "טכנולוגיה", "בינלאומי", "חיצוניימ", "טכנולוגיות", "איכותיימ", "אוטומטית", "אפליקציית", "קייטרינג", "בלונדינית", "מעודכנימ", "מעניינימ", "התחייבות", "מקצועיות", "הזדמנויות", "אלומיניומ", "אנדרואיד", "התייחסות", "אסטרטגיה", "פוטנציאל", "דיגיטליימ", "אפליקציה", "פסיכולוגיה", "התמודדות", "בינלאומיימ", "אדריכלות", "ציבוריימ", "בינלאומית", "דיגיטלית", "ישראליות", "קוסמטיקה", "מאפיינימ", "מאורגנימ", "פלסטינימ", "אוסטרליה", "משמעותיימ", "ייחודיימ", "פוליטיקה", "עיתונאימ", "מתמודדימ", "לקוחותינו", "טכנולוגי", "מיומנויות", "מוגבלויות", "אמריקאית", "קילומטרימ", "שימושיימ", "מתקיימימ", "היסטורית", "רלוונטיימ", "פסיכולוגי", "דיסקרטיות", "הרפתקאות", "מעוניינת", "ייחודיות", "מתייחסימ", "ניסיונות", "טכנולוגית", "מעניינות", "יצירתיות", "דמוקרטיה", "פוליטיימ", "הצטיינות", "אדריכלימ", "איינשטיינ", "וירטואלית", "ישראליימ", "פופולריימ", "אלקטרוניקה", "פופולריות", "מוטיבציה", "מתכוונימ", "אלקטרונית", "פרסומיימ", "קליפורניה", "פטרוזיליה", "וירטואלי", "סוציאלית", "אוטובוסימ", "היסטוריימ", "מפורסמימ", "קולקציית", "וושינגטונ", "אמריקאימ", "דמוקרטית", "טכנולוגיית", "יוקרתיימ", "פלטפורמה", "פילוסופיה", "בלונדיניות", "פרוטוקול", "מודרניימ", "ארגנטינה", "פיננסיימ", "ויטמינימ", "אינטרסימ", "מלאכותית", "אקטואליה", "טכנולוגיימ", "אוכלוסיית", "אוקראינה", "ספציפיימ", "בינלאומיות", "משכנתאות", "רלוונטיות", "אוכלוסייה", "משפחתיימ", "איכותיות", "צבעוניימ", "אינסטלציה", "פסיכולוגית", "ציפורניימ", "רלוונטית", "זיכרונות", "אינסטלטור", "קיצוניימ", "אטרקטיבי", "יצירתיימ", "תזונתיימ", "מאובזרימ", "סטרואידימ", "משמעותיות", "אינפורמציה", "ויקטוריה", "התבוננות", "פסיכולוג", "צבעוניות", "פלסטינית", "פוליטיות", "אוכלוסיות", "התייעצות", "ממשלתיימ", "אסטרטגיות", "מתגוררימ", "טמפרטורה", "אלטרנטיבה", "מיליונימ", "אטרקטיביימ", "פוליטיקאימ", "אופנועימ", "קריטריונימ", "מתחייבימ", "אלקטרוניימ", "ציבוריות", "פוטנציאליימ", "אסטרטגית", "חיזבאללה", "משוחררימ", "מצטיינימ", "קולומביה", "אוניברסיטה", "מולטימדיה", "אודותינו", "משפחותיהמ", "פלטפורמת", "מרוויחימ", "ספורטיבית", "אלטרנטיבית", "קמפיינימ", "מקסימלית", "פסיכומטרי", "פונקציות", "מוזיקלית", "אפקטיבית", "סטטיסטיקה", "עירוניימ", "התכוונתי", "לגיטימציה", "חשבוניות", "ספורטאימ", "מתעניינימ", "כולסטרול", "כימיקלימ", "מתקיימות", "דירקטוריונ", "מסורתיימ", "אומנויות", "בזיליקומ", "זכויותיו", "סוכנויות", "זכויותיהמ", "ניצחונות", "סטודנטית", "אינטנסיבי", "לקוחותיה", "משפחתיות", "סיטואציה", "התנהגותי", "מועדונימ", "היסטוריית", "ידידותית", "רומנטיימ", "אנטישמיות", "עיתונאית", "אינטרנטי", "מריחואנה", "מסתובבימ", "פופולרית", "אופטימיזציה", "סביבתיימ", "ספציפיות", "ברונטיות", "אנציקלופדיה", "חינוכיימ", "קהילתיימ", "אובייקטיבי", "ארלוזורוב", "אוכלוסיה", "התנהגותו", "ביולוגיה", "ייצוגיות", "אטרקטיבית", "סטנדרטימ", "קטגוריית", "סלולריימ", "בינוניימ", "חיצוניות", "אינטימית", "מודרניות", "נוסטלגיה", "פסיכולוגימ", "אינטראקציה", "לגיטימית", "התעוררות", "מתכוננימ", "ביקורתית", "אוניברסיטאות", "סימפטומימ", "אוטומטיות", "חשבונאות", "אורגניימ", "ארכיטקטורה", "התיישבות", "פוליטיקאי", "היסטוריות", "גלובליימ", "טרקטורונימ", "קוגניטיבי", "אלטרנטיבי", "אינטרנטית", "חינוכיות", "פלטפורמות", "אופטימיות", "מיקרופונ", "סוציאליימ", "אינטנסיבית", "רומנטיקה", "משמעויות", "פסיכיאטר", "מקצוענימ", "התארגנות", "תרבותיימ", "מינימלית", "היווצרות", "ביוגרפיה", "פסטיבלימ", "טמפרטורת", "אסטרטגיימ", "גרביונימ", "פרקליטות", "אסטרטגיית", "ביולוגית", "אקולוגית", "פוטנציאלי", "לקוחותיו", "מיליארדי", "התנהגויות", "הורמונימ", "ייעודיימ", "קונצרטימ", "אינסולינ", "אינטליגנציה", "פסיכיאטרי", "תרבותיות", "אסטרולוגיה", "ידידותיימ", "אינטגרלי", "תיאוריות", "השתלמויות", "אינטגרציה", "כירורגיה", "יומיומית", "אופטימית", "ממשלתיות", "אוטומציה", "מלאכותיימ", "אנטיביוטיקה", "ספורטיבי", "ויזואלית", "פרנקפורט", "אינטימיות", "אמריקנית", "אובייקטימ", "אולימפיאדת", "התיישנות", "רישיונות", "אינטרקומ", "קומפילציה", "מוזיקליימ", "בריאותיות", "התאוששות", "סנטימטרימ", "לימודיהמ", "אמריקאיות", "דיגיטליות", "טרוריסטימ", "תעשייתיימ", "פיזיותרפיה", "דומיננטי", "הודעותיכ", "אובייקטיבית", "בלונדיני", "עבריינימ", "בריאותיימ", "לוגיסטיקה", "אלצהיימר", "ארגוניימ", "פסיכותרפיה", "תעשייתית", "קיצוניות", "טבעוניימ", "סטטיסטיימ", "היכרויות", "יוקרתיות", "הומוסקסואל", "אינדיקציה", "מסורתיות", "שימושיות", "פרשנויות", "רזולוציה", "מוזיקאימ", "קוקטיילימ", "אופטימלית", "מתעוררימ", "בריאותית", "חווייתית", "מנגנונימ", "טבעוניות", "אינסופית", "שליחויות", "תקשורתית", "סופגניות", "קואליציה", "דוקומנטרי", "אופטימלי", "קונפליקטימ", "סטנדרטית", "חילוניימ", "ראשוניימ", "מתלוננימ", "אקווריומ", "מלפפונימ", "שיווקיימ", "אבולוציה", "פסיכיאטרית", "פרספקטיבה", "ביטחונית", "יצירותיו", "סיטואציות", "התנהלותו", "הוליסטית", "קונפליקט", "טלוויזיית", "סולידריות", "קריקטורה", "טסטוסטרונ", "גיליונות", "אדריכלית", "התפתחותית", "פונדקאות", "אוקספורד", "נוטריוני", "נקניקיות", "פוטנציאלימ", "אירופאית", "אוניברסלי", "מתוכננימ", "דוגמניות", "עדיפויות", "הורוסקופ", "עירוניות", "קומפוזיציה", "שייקספיר", "מתיישבימ", "השתלשלות", "פוליאסטר", "אופיינית", "אפוטרופוס", "התפתחויות", "דובדבנימ", "טשרניחובסקי", "התעניינו", "יכולותיו", "לימודיימ", "התעניינות", "קולינרית", "ליכטנשטיינ", "התחייבויות", "וירטואליימ", "מאופיינת", "אינפלציה", "סטטיסטית", "פינגווינ", "אוטומטיימ", "כירורגית", "מולקולות", "אנימציות", "אליפויות", "אפקטיביות", "אינטראקטיבי", "פמיניסטית", "אלגוריתמ", "התכוונתמ", "קוסמטיקאית", "רומנטיות", "משוכנעימ", "קוסמטיימ", "פסיכולוגיימ", "מיליארדימ", "תחרותיימ", "כוחותינו", "אינדונזיה", "דיסקרטית", "ביטחוניימ", "אילוסטרציה", "קוגניטיבית", "דמוקרטיות", "התייעלות", "שוויונית", "מתוחכמימ", "שוקולדימ", "אוקראיני", "קונספירציה", "אלקטרוניות", "ליטיגציה", "מפורסמות", "אקולוגיה", "טרומפלדור", "בעייתיימ", "בייביסיטר", "תקליטנימ", "סטטיסטיקות", "פורטוגזית", "התרבויות", "פילדלפיה", "אטרקטיביות", "טענותיהמ", "אמריקנימ", "פילוסופית", "מתגייסימ", "רפלקסולוגיה", "התפתחותי", "דירקטורימ", "אלטרנטיבות", "ספונטנית", "סימולטור", "קרוליינה", "טיפוליות", "קורנפלור", "וריאציות", "התנחלויות", "התנגדויות", "היסטוריונ", "טלוויזיות", "איסטנבול", "בינוניות", "התמוטטות", "וירטואליות", "קולקציות", "פרופילימ", "ייעודיות", "סוציאליות", "מבולבלימ", "ספרותיימ", "וטרינרית", "אוריינטציה", "אינטימיימ", "תיירותית", "לגליזציה", "סיעודיימ", "אלכוהוליימ", "התפטרותו", "קבוצתיות", "טמפרטורות", "פרקינסונ", "אפגניסטנ", "אינסטלטורימ", "תעסוקתית", "פעולותיו", "ממוחשבות", "אלטרנטיביימ", "קילוגרמימ", "חובבניות", "קולנועית", "אינטראקטיבית", "קריטריונ", "מועמדותו", "סוציולוגיה", "אייקונימ", "אופוזיציה", "אמריקאיימ", "אוטונומיה", "התעוררתי", "סביבתיות", "בעייתיות", "תיכוניימ", "איטלקיות", "ירושלמית", "התנהגותמ", "אינטואיציה", "סטנדרטיימ", "מונטריאול", "שווייצרי", "הורמונלי", "הגיוניימ", "אינדיאנה", "תקופתיות", "אירופאיות", "פרוטוקולימ", "פרילנסרימ", "ביולוגיימ", "עבודותיו", "פיננסיות", "קונסולות", "מתאפיינת", "פונקציית", "טיפוליימ", "מתפרסמימ", "התאכזבתי", "אבולוציונית", "אולטרסאונד", "אנונימית", "מטרופולינ", "אוטונומית", "נורמטיבי", "אלקטרונימ", "אינטלקטואלית", "תקשורתיימ", "אגרסיבית", "אותנטיות", "אוריינות", "התפתחותו", "מלוכלכימ", "מניפולציה", "התייחסתי", "נורווגיה", "סוציאליסטית", "מעורבותו", "זכויותיה", "דמוקרטיימ", "אקזוטיימ", "אוטונומי", "שמפיניונ", "ביוטכנולוגיה", "משתייכימ", "התנגדותו", "התמחויות", "התפרצויות", "קולקטיבית", "מניפולציות", "שותפויות", "קוריאנית", "התייצבות", "מודיעיני", "סינגפורי", "אוכמניות", "הסתובבתי", "לוקסמבורג", "אופציונלי", "נורמליימ", "קישוריות", "פרופורציה", "השתתפותו", "אלחוטיות", "אורוגוואי", "בטיחותית", "אותנטיימ", "הידרדרות", "אלגוריתמימ", "מתבוננימ", "קבוצתיימ", "תכונותיו", "קולומבוס", "סיינטולוגיה", "רובוטיקה", "טרנספורמציה"]:["information", "business", "available", "copyright", "software", "research", "university", "management", "development", "education", "national", "internet", "community", "shipping", "technology", "security", "computer", "following", "download", "personal", "including", "directory", "location", "government", "children", "shopping", "previous", "department", "description", "insurance", "property", "customer", "different", "training", "categories", "category", "register", "november", "industry", "accessories", "application", "feedback", "complete", "financial", "standard", "equipment", "performance", "language", "experience", "important", "activities", "additional", "password", "something", "question", "building", "analysis", "possible", "professional", "committee", "interest", "reference", "companies", "learning", "delivery", "president", "original", "discussion", "agreement", "marketing", "association", "specific", "collection", "director", "planning", "database", "official", "technical", "conference", "environment", "district", "calendar", "statement", "resource", "document", "material", "individual", "together", "function", "economic", "subscribe", "everything", "production", "commercial", "advertising", "treatment", "newsletter", "knowledge", "magazine", "currently", "construction", "protection", "policies", "position", "engineering", "wireless", "corporate", "purchase", "response", "practice", "hardware", "countries", "discount", "remember", "political", "increase", "advertise", "availability", "activity", "although", "employment", "commission", "regional", "supplies", "institute", "exchange", "electronic", "continue", "anything", "condition", "effective", "organization", "selection", "mortgage", "corporation", "solution", "addition", "executive", "necessary", "according", "clothing", "particular", "homepage", "military", "decision", "facilities", "division", "appropriate", "actually", "statistics", "investment", "starting", "registration", "consumer", "furniture", "structure", "contract", "virginia", "multiple", "distribution", "industrial", "potential", "responsible", "foundation", "friendly", "schedule", "everyone", "independent", "approach", "physical", "operating", "medicine", "telephone", "population", "navigation", "therefore", "evidence", "christian", "favorite", "understand", "recently", "probably", "worldwide", "connection", "publisher", "transfer", "introduction", "properties", "hospital", "overview", "excellent", "opportunity", "distance", "assessment", "especially", "interface", "operation", "existing", "beautiful", "significant", "technologies", "directly", "manufacturer", "providing", "searches", "authority", "programme", "strategy", "teaching", "enterprise", "educational", "positive", "football", "abstract", "alternative", "processing", "resolution", "publication", "photography", "republic", "vacation", "academic", "assistance", "mountain", "consider", "northern", "otherwise", "politics", "disclaimer", "membership", "modified", "internal", "background", "character", "maintenance", "southern", "yourself", "pressure", "submitted", "television", "throughout", "programming", "external", "regarding", "beginning", "capacity", "electric", "businesses", "specified", "restaurant", "relationship", "traditional", "creative", "progress", "sometimes", "families", "themselves", "transport", "interesting", "evaluation", "galleries", "agencies", "literature", "respective", "michigan", "critical", "definition", "secretary", "networking", "employee", "colorado", "relevant", "guidelines", "installation", "attention", "difference", "facility", "certificate", "minister", "coverage", "automotive", "successful", "communities", "clinical", "situation", "publishing", "emergency", "developing", "currency", "determine", "temperature", "historical", "commerce", "difficult", "scientific", "satellite", "particularly", "cultural", "functional", "monitoring", "graduate", "architecture", "thinking", "recommend", "provider", "optional", "dictionary", "accounting", "professor", "generally", "religion", "permission", "generation", "chemical", "component", "exercise", "guarantee", "processes", "congress", "username", "paperback", "argument", "competition", "creating", "attorney", "quantity", "reporting", "essential", "platform", "affiliate", "immediately", "designated", "recovery", "merchant", "universal", "presentation", "compliance", "campaign", "improvement", "challenge", "acceptance", "strategies", "election", "multimedia", "certified", "computing", "interactive", "separate", "procedure", "leadership", "religious", "breakfast", "developer", "identify", "domestic", "comparison", "sequence", "movement", "printing", "baseball", "approval", "adventure", "matching", "offering", "assistant", "variable", "yesterday", "wholesale", "workshop", "extension", "completely", "lighting", "portable", "electrical", "applicable", "classical", "warranty", "dedicated", "direction", "basketball", "assembly", "criminal", "powerful", "personnel", "supplied", "identified", "advantage", "maintain", "priority", "anonymous", "straight", "integration", "interview", "framework", "criteria", "associate", "behavior", "frequently", "changing", "festival", "laboratory", "whatever", "eligible", "checkout", "handling", "destination", "intelligence", "residential", "industries", "protocol", "partnership", "editorial", "expression", "replacement", "strategic", "compatible", "apartment", "consulting", "recreation", "designer", "marriage", "negative", "translation", "ministry", "proposal", "birthday", "slightly", "lingerie", "legislation", "breaking", "ultimate", "frequency", "forecast", "accuracy", "pharmacy", "creation", "addresses", "chairman", "violence", "permanent", "agriculture", "cleaning", "portfolio", "practical", "exclusive", "originally", "utilities", "philosophy", "regulation", "reduction", "referred", "nutrition", "recording", "secondary", "wonderful", "prevention", "presence", "automatic", "healthcare", "increasing", "majority", "containing", "combination", "amendment", "strength", "libraries", "convention", "principal", "daughter", "standing", "ordering", "previously", "bookmark", "household", "batteries", "subscription", "contemporary", "exposure", "permalink", "signature", "gambling", "provision", "certainly", "newspaper", "liability", "trademark", "interior", "promotion", "relative", "identity", "conversion", "reasonable", "victoria", "revision", "broadband", "influence", "importance", "webmaster", "prescription", "instance", "specifically", "represent", "conservation", "discover", "marketplace", "evolution", "greatest", "operator", "encyclopedia", "continuing", "interracial", "competitive", "tracking", "preparation", "receiving", "accordance", "accurate", "instruction", "managing", "annotation", "establish", "paragraph", "mathematics", "compensation", "aircraft", "conflict", "employer", "percentage", "describe", "heritage", "immediate", "agricultural", "supporting", "audience", "participate", "specialist", "institution", "searching", "sporting", "indicate", "favourite", "transmission", "extremely", "concerning", "equivalent", "chemistry", "neighborhood", "advisory", "curriculum", "template", "anywhere", "psychology", "investor", "wildlife", "elementary", "speaking", "unlimited", "checking", "printable", "guidance", "enforcement", "hardcover", "glossary", "celebrity", "appendix", "chocolate", "supplier", "controlled", "requirement", "authorities", "pregnancy", "biography", "notebook", "explorer", "historic", "authorized", "upcoming", "retirement", "financing", "efficiency", "efficient", "commitment", "specialty", "constant", "portland", "qualified", "discovery", "classified", "relating", "confidence", "alliance", "engineer", "lifestyle", "consistent", "clearance", "inventory", "converter", "organisation", "becoming", "objective"];
+let WHSM=st('lr-wh-sm')||'classic',HMSM=st('lr-hm-sm')||'classic';
+function hmBestKey(){return HM.kind==='blitz'?'lr-hm-best-blitz':HM.kind==='zen'?'lr-hm-best-zen':'lr-hm-best'}
+const SMN=()=>[['classic',tr('Classic','קלאסי')],['blitz',tr('Blitz','בליץ')],['zen',tr('Zen','זן')]];
+const SMD={wh:{classic:tr('80 seconds. Beat your best.','80 שניות. שברו את השיא.'),blitz:tr('30 seconds, and every word adds time.','30 שניות, וכל מילה מוסיפה זמן.'),zen:tr('No clock. Find words at your own pace, then tap Finish.','בלי שעון. מוצאים מילים בקצב שלכם ולוחצים סיום.')},
+  hm:{classic:tr('How many words can you solve before you hang?','כמה מילים תפתרו לפני שתיתלו?'),blitz:tr('60 seconds: solve as many words as you can. Getting hanged only costs time.','60 שניות: פתרו כמה שיותר מילים. כשנתלים רק מפסידים זמן.'),zen:tr('No hanging, no clock, and a free hint button.','בלי תלייה, בלי שעון, ועם כפתור רמז חינם.')}};
+function smChips(game,where,cur,set){
+  let c=document.getElementById(game+'smc');if(!c){c=document.createElement('div');c.id=game+'smc';c.className='smchips';where.after(c)}
+  c.innerHTML=SMN().map(([k,n])=>'<button data-k="'+k+'" class="'+(k===cur?'on':'')+'">'+n+'</button>').join('');
+  c.querySelectorAll('button').forEach(b=>b.onclick=()=>{set(b.dataset.k);SFX.play('select')});
+  c.classList.remove('hide');return c;
+}
+(function(){
+  const wrap=(name,after)=>{const f=window[name];if(typeof f!=='function')return;window[name]=function(){const r=f.apply(this,arguments);try{after.apply(this,arguments)}catch(e){}return r}};
+  // mode chips on the Solo screens
+  wrap('whOpen',function(kind){const c=document.getElementById('whsmc');if(kind!=='solo'){if(c)c.classList.add('hide');return}
+    const draw=()=>{smChips('wh',$('whpi'),WHSM,k=>{WHSM=k;sv('lr-wh-sm',k);draw()});$('whpt').textContent=tr('Word Hunt · ','ציד מילים · ')+SMN().find(x=>x[0]===WHSM)[1];
+      const b=+st(WHSM==='classic'?'lr-wh-best':'lr-wh-best-'+WHSM)||0;$('whpi').textContent=SMD.wh[WHSM]+' '+tr('Best: ','שיא: ')+fmtN(b)};draw()});
+  wrap('whPlay',function(o){if(o&&o.sm==='blitz'){$('whclock').textContent='0:30'}if(o&&o.sm==='zen'){$('whclock').textContent='∞';$('whquit').textContent=tr('Finish','סיום')}});
+  wrap('whScore',function(w){if(WH.sm==='blitz'&&WH.live){WH.endAt=Math.min(Date.now()+WH.ms,WH.endAt+w.length*1000)}});
+  wrap('hmOpen',function(kind){const c=document.getElementById('hmsmc');if(kind!=='solo'){if(c)c.classList.add('hide');return}
+    const draw=()=>{smChips('hm',$('hmpi'),HMSM,k=>{HMSM=k;sv('lr-hm-sm',k);draw()});$('hmpt').textContent=tr('Hangman · ','איש תלוי · ')+SMN().find(x=>x[0]===HMSM)[1];
+      const b=+st(HMSM==='classic'?'lr-hm-best':'lr-hm-best-'+HMSM)||0;$('hmpi').textContent=SMD.hm[HMSM]+' '+tr('Best: ','שיא: ')+fmtN(b)};draw()});
+  wrap('hmPlay',function(o){
+    let hb=document.getElementById('hmhint');if(!hb){hb=document.createElement('button');hb.id='hmhint';hb.className='alt';$('hmkb').after(hb)}
+    hb.textContent='💡 '+tr('Hint','רמז');hb.classList.toggle('hide',HM.kind!=='zen');
+    hb.onclick=()=>{if(!HM.live||HM.busyWord||!HM.word)return;const l=[...new Set(HM.word)].filter(c=>!HM.gset.has(c));if(l.length)hmGuess(l[Math.floor(Math.random()*l.length)])};
+    if(HM.kind==='zen')$('hmquit').textContent=tr('Finish','סיום');
+  });
+  // these screens may already be open (the page was opened straight into Solo): draw the mode chips now
+  if(typeof MODE!=='undefined'){if(MODE==='wh-solo')whOpen('solo');if(MODE==='hm-solo')hmOpen('solo')}
+})();
+function hmModeEnd(kind){
+  const score=HM.score,solved=HM.log.filter(x=>x.solved).map(x=>x.word),key=kind==='blitz'?'lr-hm-best-blitz':'lr-hm-best-zen',best=+st(key)||0,nb=score>best;
+  hmStop();if(nb)sv(key,score);xp+=Math.round(score/10);sv('lr-xp',xp);
+  hmShow('hmres');
+  $('hmres').innerHTML='<b>'+(nb&&score>0?tr('New best!','שיא חדש!'):kind==='blitz'?tr('Time’s up!','נגמר הזמן!'):tr('Well played!','כל הכבוד!'))+'</b><div class="whbig">'+fmtN(score)+'</div>'+
+    '<p class="note" style="text-align:center">'+tr('Words solved: ','מילים שנפתרו: ')+solved.length+' · '+tr('best ','שיא ')+fmtN(Math.max(best,score))+'</p>'+
+    (solved.length?'<div class="hmchips">'+solved.map(w=>'<span class="wchip mine">'+hmDisp(w).join('')+'</span>').join('')+'</div>':'')+
+    '<button id="hmagain">'+tr('Play again','שוב')+'</button><div class="links"><button id="hmmenu">'+tr('Back to menu','חזרה לתפריט')+'</button></div>';
+  $('hmagain').onclick=()=>hmOpen('solo');$('hmmenu').onclick=()=>goMenu();
+  whCheer(nb&&score>0?'You win!':'Time’s up!');
+}
+
+/* ---- definitions (Wiktionary, when online) ---- */
+const DEFN=(()=>{
+  const cache={},FIN={'כ':'ך','מ':'ם','נ':'ן','פ':'ף','צ':'ץ'};let seq=0;
+  const fin=w=>LANG==='he'&&w?w.slice(0,-1)+(FIN[w.slice(-1)]||w.slice(-1)):w;
+  const strip=s=>{try{return (new DOMParser().parseFromString(String(s||''),'text/html').body.textContent||'').replace(/\s+/g,' ').trim()}catch(e){return ''}};
+  async function get(w){
+    const q=fin(String(w||'').toLowerCase());if(!q)return null;if(q in cache)return cache[q];cache[q]=null;
+    try{const c=new AbortController();const t=setTimeout(()=>c.abort(),5000);
+      const r=await fetch('https://en.wiktionary.org/api/rest_v1/page/definition/'+encodeURIComponent(q),{signal:c.signal});clearTimeout(t);
+      if(!r.ok)return null;const j=await r.json();
+      for(const e of (j[LANG==='he'?'he':'en']||[]))for(const d of (e.definitions||[])){const x=strip(d.definition);if(x.length>2)return cache[q]={w:q,pos:e.partOfSpeech||'',t:x.length>150?x.slice(0,147)+'…':x}}
+    }catch(e){}
+    return null;
+  }
+  const html=r=>'📖 <b>'+esc(r.w)+'</b> <i>'+esc(r.pos)+'</i> — '+esc(r.t);
+  async function show(w,el){if(!el)return;const g=++seq;el.innerHTML='';const r=await get(w);if(g!==seq||!r)return;el.innerHTML='<div class="lrdef">'+html(r)+'</div>'}
+  async function pop(w){const r=await get(w);document.querySelectorAll('.lrdefpop').forEach(x=>x.remove());if(!r)return;
+    const d=document.createElement('div');d.className='lrdef lrdefpop';d.innerHTML=html(r);d.onclick=()=>d.remove();document.body.appendChild(d);setTimeout(()=>d.remove(),6000)}
+  return {get,show,pop,clear(el){seq++;if(el)el.innerHTML=''}};
+})();
+(function(){
+  const wrap=(name,before,after)=>{const f=window[name];if(typeof f!=='function')return;window[name]=function(){try{before&&before.apply(this,arguments)}catch(e){}const r=f.apply(this,arguments);try{after&&after.apply(this,arguments)}catch(e){}return r}};
+  const box=()=>{let b=document.getElementById('lrdefbox');if(!b){b=document.createElement('div');b.id='lrdefbox';$('hint').after(b)}return b};
+  wrap('fillBoxes',null,function(w){if(w)DEFN.show(w,box())});
+  wrap('soloRound',function(){DEFN.clear(document.getElementById('lrdefbox'))});
+  wrap('go',function(){DEFN.clear(document.getElementById('lrdefbox'))});
+  const hbox=()=>{let b=document.getElementById('hmdef');if(!b){b=document.createElement('div');b.id='hmdef';$('hmmsg').after(b)}return b};
+  wrap('hmDone',function(how,word){if(how==='solved')DEFN.show(word,hbox())});
+  wrap('hmNewWord',function(){DEFN.clear(document.getElementById('hmdef'))});
+  wrap('hmSetWord',function(){DEFN.clear(document.getElementById('hmdef'))});
+  document.addEventListener('click',e=>{const c=e.target.closest&&e.target.closest('#whres .wchip,#hmres .wchip');if(c){const w=(c.firstChild&&c.firstChild.nodeType===3?c.firstChild.textContent:c.textContent).trim();if(w)DEFN.pop(w)}});
+})();
+
+/* ---- credits: 5 free games per game per day, then credits (any game); dailies are always free ---- */
+(function(){
+  if(typeof PAY==='undefined')return;
+  const gate=(name,g,cond)=>{const f=window[name];if(typeof f!=='function')return;window[name]=function(){const a=arguments,self=this;if(cond&&!cond.apply(null,a))return f.apply(self,a);PAY.gate(g,()=>f.apply(self,a))}};
+  gate('soloStart','rush',k=>k!=='daily');
+  gate('start','rush',m=>m==='local'||m==='online');
+  gate('whPlay','wh',o=>o&&(o.kind==='solo'||o.kind==='bot'||(o.kind==='local'&&o.player===1)));
+  gate('hmPlay','hm',o=>o&&(['solo','blitz','zen','bot'].includes(o.kind)||(o.kind==='local'&&o.setter===1)));
+  gate('imDeal','imp');gate('imStartRound','imp');
+  // online: check before searching, pay when the match actually starts
+  const g=()=>MG==='wh'?'wh':MG==='hm'?'hm':'rush';
+  document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#mmFind,#mmFriend,#fJoin');if(t&&!PAY.can(g())){e.stopImmediatePropagation();e.preventDefault();PAY.store(g(),null)}},true);
+  const f=window.applyM;if(typeof f==='function')window.applyM=function(s){try{if(s&&s.status==='active'&&s.id){const paid=JSON.parse(localStorage.getItem('lr-paidm')||'[]');if(paid.indexOf(s.id)<0){paid.push(s.id);localStorage.setItem('lr-paidm',JSON.stringify(paid.slice(-30)));PAY.use(s.game==='wh'?'wh':s.game==='hm'?'hm':'rush')}}}catch(e){}return f.apply(this,arguments)};
+})();
+
+/* ---- Letter Rush win streak: win a game of Letter Rush every day ---- */
+(function(){
+  if(typeof PAY==='undefined')return;
+  function flame(n){if(!n)return;try{SFX.play('crown')}catch(e){}
+    const el=document.createElement('div');el.className='achtoast';el.innerHTML='<big>🔥</big><span>'+tr(n+'-day win streak!','רצף ניצחונות של '+n+' ימים!')+'<small>'+tr('Win a Letter Rush game tomorrow to keep it.','נצחו במשחק מרוץ אותיות מחר כדי לשמור עליו.')+'</small></span>';
+    document.body.appendChild(el);requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('on')));setTimeout(()=>{el.classList.remove('on');setTimeout(()=>el.remove(),500)},3400)}
+  const wrap=(name,after)=>{const f=window[name];if(typeof f!=='function')return;window[name]=function(){const r=f.apply(this,arguments);try{after.apply(this,arguments)}catch(e){}return r}};
+  wrap('botRecord',function(game,lvl,res){if(game==='rush'&&res==='w')flame(PAY.win())});
+  wrap('soloEnd',function(){if(typeof sSolved!=='undefined'&&sSolved>=5)flame(PAY.win())});
+  const f=window.applyM;if(typeof f==='function')window.applyM=function(s){const r=f.apply(this,arguments);try{if(s&&s.status==='finished'&&(s.game||'rush')==='rush'&&M&&M.ids&&s.winner===M.ids[M.me-1])flame(PAY.win())}catch(e){}return r};
+})();
 </script></body></html>
