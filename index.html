@@ -174,7 +174,7 @@ input:focus{outline:none;border-color:var(--acc)}
 <div id="labv" class="hide col"><p class="which" id="labt"></p><p class="trsum" id="labsum"></p><div id="lablist" class="col"></div></div>
 <div class="bgl" aria-hidden="true"></div>
 <button id="back" class="link hide">Back</button>
-<p class="ver">Version 1.3</p>
+<p class="ver">Version 1.4</p>
 </main><script>try{if(localStorage.getItem('lr-lang')===null&&/^(he|iw)\b/i.test(navigator.language||''))localStorage.setItem('lr-lang','he')}catch(e){}
 
 
@@ -3104,9 +3104,22 @@ hud2();setInterval(hud2,2000);
   function dark(){var t=document.documentElement.dataset.theme;return t?t==='dark':!!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)}
   function soundOn(){try{if(typeof snd!=='undefined')return !!snd}catch(e){}return g('lr-snd')!=='0'}
   function musicOn(){try{return SFX.musicOn()}catch(e){return g('lr-music')!=='0'}}
+  // vibration: inside the Android app, through the app (its WebView ignores navigator.vibrate); off when the switch is off
+  (function(){
+    var orig=navigator.vibrate&&navigator.vibrate.bind(navigator);
+    function vib(p){
+      if(g('lr-vib')==='0')return false;
+      var a=(Array.isArray(p)?p:[p]).map(function(x){return Math.max(0,Math.round(+x||0))});
+      if(!a.length||(a.length===1&&!a[0]))return true;
+      if(window.Android&&Android.vibrate){try{Android.vibrate(a.join(','));return true}catch(e){}}
+      try{return orig?orig(p):false}catch(e){return false}
+    }
+    try{Object.defineProperty(navigator,'vibrate',{value:vib,configurable:true,writable:true})}catch(e){try{navigator.vibrate=vib}catch(_){}}
+  })();
   var ROWS=[
     {k:'music',ic:'🎵',en:'Music',he:'מוזיקה',on:musicOn,flip:function(){var b=$('musb');if(b)b.click();else{try{SFX.music(!musicOn())}catch(e){}}}},
     {k:'sound',ic:'🔊',en:'Sound effects',he:'אפקטים קוליים',on:soundOn,flip:function(){var b=$('snd');if(b)b.click();else s('lr-snd',soundOn()?'0':'1')}},
+    {k:'vib',ic:'📳',en:'Vibration',he:'רטט',on:function(){return g('lr-vib')!=='0'},flip:function(){var on=g('lr-vib')!=='0';s('lr-vib',on?'0':'1');if(!on)navigator.vibrate([40,60,40])}},
     {k:'dark',ic:'🌙',en:'Dark mode',he:'מצב כהה',on:dark,flip:function(){var b=$('theme');if(b){b.click();return}
       var t=dark()?'light':'dark';document.documentElement.dataset.theme=t;s('lr-theme',t)}}
   ];
