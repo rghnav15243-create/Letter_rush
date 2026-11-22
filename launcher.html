@@ -3151,9 +3151,14 @@ hud2();setInterval(hud2,2000);
     var home=!!$('langb');
     d.innerHTML='<div class="sheet"><h3>⚙️ '+T('Settings','הגדרות')+'</h3>'+
       ROWS.map(function(r){return '<button class="srow" data-k="'+r.k+'"><span>'+r.ic+' '+T(r.en,r.he)+'</span><span class="sw" aria-hidden="true"></span></button>'}).join('')+
+      (home?'<button class="srow" data-k="tut"><span>🎓 '+T('Always show the tutorial','הצג תמיד את המדריך')+'</span><span class="sw" aria-hidden="true"></span></button>':'')+
       (home?'<div class="lab">🌐 '+T('Language','שפה')+'</div><div class="lang"><button class="'+(HE?'alt':'alt cur')+'" data-l="en">English</button><button class="'+(HE?'alt cur':'alt')+'" data-l="he">עברית</button></div>':'')+
       '<button class="alt lrsclose">'+T('Close','סגירה')+'</button></div>';
     function draw(){ROWS.forEach(function(r){var b=d.querySelector('[data-k="'+r.k+'"]');var on=!!r.on();b.classList.toggle('on',on);b.setAttribute('role','switch');b.setAttribute('aria-checked',on?'true':'false')})}
+    var tut=d.querySelector('[data-k="tut"]');
+    function drawTut(){if(!tut)return;var on=g('lr-tut-always')==='1';tut.classList.toggle('on',on);tut.setAttribute('role','switch');tut.setAttribute('aria-checked',on?'true':'false')}
+    if(tut)tut.onclick=function(){var on=g('lr-tut-always')!=='1';s('lr-tut-always',on?'1':'0');var b=$('gTour');if(b)b.hidden=!on&&g('lr-tour-done')==='1';drawTut();try{SFX.play('blip',660)}catch(e){}};
+    drawTut();
     ROWS.forEach(function(r){d.querySelector('[data-k="'+r.k+'"]').onclick=function(){r.flip();draw();try{SFX.play('blip',660)}catch(e){}}});
     [].forEach.call(d.querySelectorAll('.lang button'),function(b){b.onclick=function(){if((b.dataset.l==='he')!==HE)$('langb').click()}});
     d.querySelector('.lrsclose').onclick=function(){d.remove()};
@@ -3180,10 +3185,11 @@ hud2();setInterval(hud2,2000);
     '.tourb .pl{flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:#fff;color:#ff8a00;font-size:1.3rem;box-shadow:0 3px 0 rgba(0,0,0,.15)}'+
     '.tourb b{display:block;font-size:1.25rem}.tourb small{display:block;font-weight:600;opacity:.85}'+
     '.tourb:active{transform:translateY(4px);box-shadow:0 2px 0 #c76f00}'+
-    '.tourb.new{animation:tourpulse 1.8s ease-in-out infinite}@keyframes tourpulse{50%{transform:scale(1.03)}}';
+    '.tourb[hidden]{display:none}.tourb.new{animation:tourpulse 1.8s ease-in-out infinite}@keyframes tourpulse{50%{transform:scale(1.03)}}';
   document.head.appendChild(s);
-  var b=document.createElement('button');b.id='gTour';b.className='tourb'+(done?'':' new');
-  b.innerHTML='<span class="pl">▶</span><span><b>'+(he?(done?'סיור מהיר':'שחקו עכשיו'):(done?'Quick tour':'Play now'))+'</b><small>'+(he?'סיור של 2 דקות בכל המשחקים':'A 2-minute tour of all the games')+'</small></span>';
+  var always=false;try{always=localStorage.getItem('lr-tut-always')==='1'}catch(e){}
+  var b=document.createElement('button');b.id='gTour';b.className='tourb'+(done?'':' new');b.hidden=done&&!always;
+  b.innerHTML='<span class="pl">▶</span><span><b>'+(he?'מדריך':'Tutorial')+'</b><small>'+(he?'2 דקות, כל המשחקים':'2 minutes, all the games')+'</small></span>';
   var home=document.getElementById('home');home.insertBefore(b,home.firstChild);
   b.onclick=function(){nav('game.html#tour')};
 })();

@@ -5093,9 +5093,14 @@ const DEFN=(()=>{
     var home=!!$('langb');
     d.innerHTML='<div class="sheet"><h3>⚙️ '+T('Settings','הגדרות')+'</h3>'+
       ROWS.map(function(r){return '<button class="srow" data-k="'+r.k+'"><span>'+r.ic+' '+T(r.en,r.he)+'</span><span class="sw" aria-hidden="true"></span></button>'}).join('')+
+      (home?'<button class="srow" data-k="tut"><span>🎓 '+T('Always show the tutorial','הצג תמיד את המדריך')+'</span><span class="sw" aria-hidden="true"></span></button>':'')+
       (home?'<div class="lab">🌐 '+T('Language','שפה')+'</div><div class="lang"><button class="'+(HE?'alt':'alt cur')+'" data-l="en">English</button><button class="'+(HE?'alt cur':'alt')+'" data-l="he">עברית</button></div>':'')+
       '<button class="alt lrsclose">'+T('Close','סגירה')+'</button></div>';
     function draw(){ROWS.forEach(function(r){var b=d.querySelector('[data-k="'+r.k+'"]');var on=!!r.on();b.classList.toggle('on',on);b.setAttribute('role','switch');b.setAttribute('aria-checked',on?'true':'false')})}
+    var tut=d.querySelector('[data-k="tut"]');
+    function drawTut(){if(!tut)return;var on=g('lr-tut-always')==='1';tut.classList.toggle('on',on);tut.setAttribute('role','switch');tut.setAttribute('aria-checked',on?'true':'false')}
+    if(tut)tut.onclick=function(){var on=g('lr-tut-always')!=='1';s('lr-tut-always',on?'1':'0');var b=$('gTour');if(b)b.hidden=!on&&g('lr-tour-done')==='1';drawTut();try{SFX.play('blip',660)}catch(e){}};
+    drawTut();
     ROWS.forEach(function(r){d.querySelector('[data-k="'+r.k+'"]').onclick=function(){r.flip();draw();try{SFX.play('blip',660)}catch(e){}}});
     [].forEach.call(d.querySelectorAll('.lang button'),function(b){b.onclick=function(){if((b.dataset.l==='he')!==HE)$('langb').click()}});
     d.querySelector('.lrsclose').onclick=function(){d.remove()};
@@ -5201,7 +5206,7 @@ const DEFN=(()=>{
   const NAMES=[T('Letter Rush','מרוץ אותיות'),T('Word Hunt','ציד מילים'),T('Hangman','איש תלוי')];
   const bar=document.createElement('div');bar.id='tourbar';
   document.querySelector('header').after(bar);
-  function drawBar(){bar.innerHTML='<span class="dots">'+[1,2,3].map(i=>i<TOUR.step?'●':i===TOUR.step?'◉':'○').join('')+'</span><b>'+T('Tour','סיור')+' '+TOUR.step+'/3 · '+NAMES[TOUR.step-1]+'</b><button class="alt" id="tskip">'+T('Skip ›','דלגו ‹')+'</button>';$('tskip').onclick=next}
+  function drawBar(){bar.innerHTML='<span class="dots">'+[1,2,3].map(i=>i<TOUR.step?'●':i===TOUR.step?'◉':'○').join('')+'</span><b>'+T('Tutorial','מדריך')+' '+TOUR.step+'/3 · '+NAMES[TOUR.step-1]+'</b><button class="alt" id="tskip">'+T('Skip ›','דלגו ‹')+'</button>';$('tskip').onclick=next}
   bar.hidden=true;
 
   function card(html,btn,go,extra){
@@ -5272,7 +5277,7 @@ const DEFN=(()=>{
     sv('lr-tour-done','1');
     const x1=xpNow(),gain=Math.max(0,x1-TOUR.xp0),newA=Math.max(0,achN()-TOUR.ach0);
     const row=(a,b)=>'<div><span>'+a+'</span><span>'+b+'</span></div>';
-    card('<div class="big">🎉</div><h2>'+T('Tour complete!','הסיור הושלם!')+'</h2>'+
+    card('<div class="big">🎉</div><h2>'+T('Tutorial complete!','המדריך הושלם!')+'</h2>'+
       '<div class="sum">'+
         row('🟨 '+NAMES[0],TOUR.lr+' '+T('words','מילים'))+
         row('🔍 '+NAMES[1],TOUR.wh?TOUR.wh.n+' '+T('words','מילים')+' · '+fmtN(TOUR.wh.score):'—')+
