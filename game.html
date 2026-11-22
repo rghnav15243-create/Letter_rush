@@ -444,7 +444,8 @@ b{font-weight:700}.card>b:first-child{font-size:1.2rem}
   <div class="links"><button id="quit">Leave match</button></div>
 </section>
 </main>
-<script>(function(){var m=location.hash.match(/^#(?:join|imp)=[A-Za-z0-9]{5}(?:&l=(he|en))?/);if(m&&m[1]){try{localStorage.setItem('lr-lang',m[1])}catch(e){}}
+<script>try{if(localStorage.getItem('lr-lang')===null&&/^(he|iw)\b/i.test(navigator.language||''))localStorage.setItem('lr-lang','he')}catch(e){}
+(function(){var m=location.hash.match(/^#(?:join|imp)=[A-Za-z0-9]{5}(?:&l=(he|en))?/);if(m&&m[1]){try{localStorage.setItem('lr-lang',m[1])}catch(e){}}
 var he=false;try{he=localStorage.getItem('lr-lang')==='he'}catch(e){}if(he)document.write('<script src="he_dict.js" charset="utf-8"><\/script>')})()</script>
 <script>
 //---------------------------------------------------------------------
@@ -4318,6 +4319,7 @@ else if(typeof MODE!=='undefined'&&MODE==='imp-online')impOnline();
   /* timer turns red and pulses near the end */
   const bar=$('bar');setInterval(()=>{const w=parseFloat(bar.style.width);bar.classList.toggle('low',w>0&&w<28)},200);
   /* confetti */
+  window.lrConfetti=n=>confetti(n);
   let cv=null,ctx=null,parts=[],raf=0;
   function confetti(n){
     if(calm)return;
@@ -4849,9 +4851,10 @@ b.onclick=function(e){e.stopPropagation();SFX.music(!SFX.musicOn());draw()};draw
   function credits(){return Math.max(0,+L('lr-credits')||0)}
   function unlimited(){return L('lr-unlimited')==='1'}
   function left(g){return Math.max(0,FREE-(usedToday().used[g]||0))}
-  function can(g){return unlimited()||left(g)>0||credits()>0}
+  function can(g){return !!window.LR_TOUR||unlimited()||left(g)>0||credits()>0}
   function stat(g){S('lr-stat-'+g,(+L('lr-stat-'+g)||0)+1)}
   function use(g){
+    if(window.LR_TOUR)return true;   // the guided tour is free
     if(unlimited()){stat(g);return true}
     var u=usedToday();if((u.used[g]||0)<FREE){u.used[g]=(u.used[g]||0)+1;S('lr-pay',JSON.stringify(u));stat(g);return true}
     var c=credits();if(c>0){S('lr-credits',c-1);stat(g);return true}
@@ -5095,6 +5098,184 @@ const DEFN=(()=>{
   };
   css();
   var b=$('setb');if(b)b.onclick=function(e){e.stopPropagation();open()};
+})();
+
+</script>
+<script>
+/* ===== Game feel: rising combo notes, last-second "CLUTCH!", slow-motion finish ===== */
+(function(){
+  const vib=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+  const note=f=>{try{SFX.play('blip',f)}catch(e){}};
+  const barLeft=()=>{const b=$('bar');const w=b&&parseFloat(b.style.width);return isNaN(w)?100:w};
+  const wrap=(name,fn)=>{const f=window[name];if(typeof f==='function')window[name]=function(){return fn.call(this,f,arguments)}};
+  const css=document.createElement('style');
+  css.textContent=
+    '@keyframes lrquake{0%,100%{transform:none}15%{transform:translate(-7px,3px) rotate(-.6deg)}30%{transform:translate(6px,-4px) rotate(.5deg)}45%{transform:translate(-5px,-2px)}60%{transform:translate(4px,3px)}80%{transform:translate(-2px,1px)}}'+
+    '.lr-quake{animation:lrquake .45s ease both}'+
+    '#fx span.clutch{color:#ff5a4f;text-shadow:0 6px 0 #9c1d16;font-size:min(16vw,84px)}'+
+    '.lrvig{position:fixed;inset:0;pointer-events:none;z-index:58;background:radial-gradient(ellipse at center,transparent 40%,rgba(10,8,40,.6));animation:lrvig .6s ease both}'+
+    '@keyframes lrvig{from{opacity:0}}'+
+    '.lr-slowmo #board,.lr-slowmo #whgrid,.lr-slowmo #hmword,.lr-slowmo .whbig{transition:transform 1.4s cubic-bezier(.2,.8,.2,1);transform:scale(1.1)}'+
+    '.lr-slowmo #fx span{animation-duration:2.2s!important}'+
+    '.whfly.combo{color:#ff8a00;font-size:1.1rem;top:auto;bottom:8px}';
+  document.head.appendChild(css);
+  function quake(){const m=document.querySelector('main');if(!m)return;m.classList.remove('lr-quake');void m.offsetWidth;m.classList.add('lr-quake');setTimeout(()=>m.classList.remove('lr-quake'),500)}
+  function clutch(){quake();setTimeout(()=>{try{whBig(tr('CLUTCH!','ברגע האחרון!'),'clutch')}catch(e){}},120);try{SFX.play('crown')}catch(e){}vib([40,30,90])}
+  function finale(won){
+    const d=document.documentElement;d.classList.add('lr-slowmo');
+    const v=document.createElement('div');v.className='lrvig';document.body.appendChild(v);
+    setTimeout(()=>{try{whBig(won?'🏆':'GG')}catch(e){}if(won){try{window.lrConfetti&&lrConfetti(220)}catch(e){}try{SFX.play('crown')}catch(e){}vib([30,60,30,60,120])}},500);
+    setTimeout(()=>{d.classList.remove('lr-slowmo');v.style.transition='opacity .5s';v.style.opacity='0';setTimeout(()=>v.remove(),550)},2300);
+  }
+  window.lrClutch=clutch;window.lrFinale=finale;
+
+  // Letter Rush solo: every word in a row plays a higher note; a word in the last moments is a clutch
+  wrap('soloSubmit',function(f,a){
+    const before=typeof sSolved!=='undefined'?sSolved:0,left=barLeft();
+    const r=f.apply(this,a);
+    if(typeof sSolved!=='undefined'&&sSolved>before){
+      if(sStreak>=2){const fr=523.25*Math.pow(2,Math.min(sStreak-1,11)*2/12);setTimeout(()=>note(fr),90);setTimeout(()=>note(fr*1.5),170)}
+      if((sm==='classic'||sm==='daily')&&left<18)clutch();
+    }
+    return r;
+  });
+  // Letter Rush rounds vs a bot / a friend: winning a round in the last moments
+  wrap('award',function(f,a){const left=barLeft(),was=typeof done!=='undefined'&&done;const r=f.apply(this,a);if(!was&&left<18)clutch();return r});
+  // a Letter Rush match is decided
+  wrap('over',function(f,a){const r=f.apply(this,a);try{const [x,y]=crowns;finale(BOT||mode==='online'?x>y:x!==y)}catch(e){}return r});
+  // Word Hunt: words found quickly one after another build a combo; a word in the last 3 seconds is a clutch
+  wrap('whScore',function(f,a){
+    const r=f.apply(this,a),now=Date.now();
+    WH.combo=WH.lastHit&&now-WH.lastHit<4000?(WH.combo||1)+1:1;WH.lastHit=now;
+    if(WH.combo>=2){const fr=523.25*Math.pow(2,Math.min(WH.combo-1,11)*2/12);setTimeout(()=>note(fr),90);
+      const c=document.createElement('div');c.className='whfly combo';c.textContent=tr('COMBO ×','רצף ×')+WH.combo;whGrid.parentNode.appendChild(c);setTimeout(()=>c.remove(),950)}
+    if(WH.sm!=='zen'&&WH.endAt&&WH.endAt-now<3000&&WH.endAt-now>0)clutch();
+    return r;
+  });
+  wrap('whBotEnd',function(f,a){const won=a[0]&&a[0].score>WH.botScore;const r=f.apply(this,a);finale(!!won);return r});
+  // Hangman: solving with seconds to spare in a race; the bot race is decided
+  wrap('hmDone',function(f,a){const r=f.apply(this,a);if(a[0]==='solved'&&HM.endAt&&HM.endAt-Date.now()<5000&&HM.endAt-Date.now()>0)clutch();return r});
+  wrap('hmTimeUp',function(f,a){const bot=HM.kind==='bot',won=bot&&HM.bot&&HM.score>HM.bot.score;const r=f.apply(this,a);if(bot)finale(!!won);return r});
+})();
+
+/* ===== Guided tour (#tour): one easy Letter Rush word or two, 30 s of Word Hunt, one Hangman word, a summary ===== */
+(function(){
+  if(MODE!=='tour')return;
+  const T=tr;
+  const achN=()=>{try{const v=JSON.parse(localStorage.getItem('lr-ach')||'{}');return Array.isArray(v)?v.length:Object.keys(v).length}catch(e){return 0}};
+  const lvlOf=x=>Math.floor((1+Math.sqrt(1+0.08*x))/2);
+  const xpNow=()=>+(localStorage.getItem('lr-xp')||0);
+  const TOUR=window.LR_TOUR={step:0,lr:0,wh:null,hm:'',xp0:xpNow(),ach0:achN()};
+  ['lr-seen','lr-wh-seen','lr-hm-seen'].forEach(k=>sv(k,'1'));
+  show('menu',false);show('online',false);show('local',false);
+
+  const css=document.createElement('style');
+  css.textContent=
+    '#tourbar{display:flex;align-items:center;gap:10px;margin:-4px 0 12px;padding:8px 10px 8px 14px;border-radius:16px;background:var(--card);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);font-weight:700}'+
+    '#tourbar .dots{letter-spacing:3px;color:var(--acc)}#tourbar b{flex:1;min-width:0}'+
+    '#tourbar button{width:auto;padding:6px 12px;border-radius:12px;font-size:.9rem;animation:none}'+
+    '.lrtour{position:fixed;inset:0;z-index:9995;display:grid;place-items:center;padding:20px max(16px,env(safe-area-inset-left,0px));background:rgba(10,8,40,.55)}'+
+    '.lrtour .tc{width:min(420px,100%);background:var(--card);color:var(--ink);border-radius:28px;padding:24px 20px;display:flex;flex-direction:column;gap:12px;text-align:center;box-shadow:0 8px 0 var(--line);animation:lrtin .5s cubic-bezier(.34,1.56,.64,1) both}'+
+    '@keyframes lrtin{from{transform:scale(.7) translateY(30px);opacity:0}}'+
+    '.lrtour .big{font-size:3.4rem;line-height:1;animation:lrtbob 1.6s ease-in-out infinite}@keyframes lrtbob{50%{transform:translateY(-6px) rotate(-4deg)}}'+
+    '.lrtour h2{margin:0;font-size:1.6rem}.lrtour p{margin:0;color:var(--mute);font-weight:600;line-height:1.4}'+
+    '.lrtour .sum{display:flex;flex-direction:column;gap:8px;text-align:start}'+
+    '.lrtour .sum div{display:flex;justify-content:space-between;gap:10px;padding:10px 14px;border-radius:14px;background:var(--tile,#f6f6ff);font-weight:700}'+
+    '.lrtour .sum div span:last-child{color:var(--acc);text-align:end}'+
+    '.lrtour .tgo{font-size:1.2rem;padding:16px}';
+  document.head.appendChild(css);
+
+  const NAMES=[T('Letter Rush','מרוץ אותיות'),T('Word Hunt','ציד מילים'),T('Hangman','איש תלוי')];
+  const bar=document.createElement('div');bar.id='tourbar';
+  document.querySelector('header').after(bar);
+  function drawBar(){bar.innerHTML='<span class="dots">'+[1,2,3].map(i=>i<TOUR.step?'●':i===TOUR.step?'◉':'○').join('')+'</span><b>'+T('Tour','סיור')+' '+TOUR.step+'/3 · '+NAMES[TOUR.step-1]+'</b><button class="alt" id="tskip">'+T('Skip ›','דלגו ‹')+'</button>';$('tskip').onclick=next}
+  bar.hidden=true;
+
+  function card(html,btn,go,extra){
+    document.querySelectorAll('.lrtour').forEach(x=>x.remove());
+    const d=document.createElement('div');d.className='lrtour';
+    d.innerHTML='<div class="tc">'+html+'<button class="tgo">'+btn+'</button>'+(extra||'')+'</div>';
+    d.querySelector('.tgo').onclick=()=>{try{SFX.play('whoosh')}catch(e){}d.remove();go()};
+    document.body.appendChild(d);try{SFX.play('select')}catch(e){}
+    return d;
+  }
+  function stopAll(){try{gen++;clearInterval(ticker);done=true}catch(e){}try{whStop()}catch(e){}try{hmStop()}catch(e){}}
+  function next(){stopAll();TOUR.step++;if(TOUR.step<=3&&!bar.hidden)drawBar();if(TOUR.step===1)lr();else if(TOUR.step===2)wh();else if(TOUR.step===3)hm();else end()}
+
+  // 1. Letter Rush: two easy words (4 then 5 letters, a letter with lots of answers)
+  function lr(){
+    card('<div class="big">🟨</div><h2>1 · '+NAMES[0]+'</h2><p>'+T('The yellow letter is already in its box. Type the other letters to make a word. Solve 2 words!','האות הצהובה כבר בתיבה שלה. הקלידו את שאר האותיות כדי ליצור מילה. פתרו 2 מילים!')+'</p><p style="font-size:.9rem">'+T('Stuck? Tap “Tell me”.','נתקעתם? הקישו על "תגיד לי".')+'</p>',
+      T('Go!','קדימה!'),()=>{bar.hidden=false;drawBar();soloStart('zen')});
+  }
+  const lenOf0=window.lenOf;
+  window.lenOf=function(r){return TOUR.step===1&&r<=2?3+r:lenOf0(r)};
+  const round0=window.soloRound;
+  window.soloRound=function(){
+    const r=round0.apply(this,arguments);
+    if(TOUR.step===1){  // move the letter to a box with many common answers
+      const n=curN,list=COMMON.slice(0,1500).filter(w=>w.length===n);
+      if(list.length){const w=list[Math.floor(Math.random()*Math.min(list.length,120))],i=Math.floor(Math.random()*n),c=w[i];
+        curHi=i;letter=LANG==='he'?fold(c):c.toUpperCase();
+        [...$('board').children].forEach((d,k)=>{d.className='sq'+(k===i?' hl':'');d.textContent=k===i?letter:''});
+        $('banner').textContent=letter+' in box '+(i+1)}
+    }
+    return r;
+  };
+  const sub0=window.soloSubmit;
+  window.soloSubmit=function(){
+    const before=sSolved,r=sub0.apply(this,arguments);
+    if(TOUR.step===1&&sSolved>before){TOUR.lr=sSolved;if(sSolved>=2){gen++;clearInterval(ticker);try{bank()}catch(e){}setTimeout(next,1500)}}
+    return r;
+  };
+
+  // 2. Word Hunt: 30 seconds
+  function wh(){
+    card('<div class="big">🔍</div><h2>2 · '+NAMES[1]+'</h2><p>'+T('Swipe across touching letters (any direction) to make words of 3+ letters. Longer words score more. 30 seconds!','החליקו על אותיות צמודות (לכל כיוון) כדי ליצור מילים של 3 אותיות ומעלה. מילים ארוכות שוות יותר. 30 שניות!')+'</p>',
+      T('Go!','קדימה!'),()=>{drawBar();show('game',false);whOpen('solo');whPlay({kind:'solo',grid:WH_BOARDS[Math.floor(Math.random()*WH_BOARDS.length)],player:1,sm:'classic',ms:30000})});
+  }
+  const up0=window.whTimeUp;
+  window.whTimeUp=function(){
+    if(TOUR.step===2&&WH.kind==='solo'){const words=[...WH.found.keys()];TOUR.wh={score:WH.score,n:words.length};xp+=Math.round(WH.score/20);sv('lr-xp',xp);setTimeout(next,1400);return}
+    return up0.apply(this,arguments);
+  };
+
+  // 3. Hangman: one word, no hanging, a hint button
+  function hm(){
+    card('<div class="big">🪢</div><h2>3 · '+NAMES[2]+'</h2><p>'+T('Guess the hidden word one letter at a time. This round you can’t be hanged, and 💡 gives a hint.','נחשו את המילה הנסתרת אות אחר אות. בסיבוב הזה אי אפשר להיתלות, ו-💡 נותן רמז.')+'</p>',
+      T('Go!','קדימה!'),()=>{drawBar();show('wh',false);hmOpen('solo');
+        const easy=HM_WORDS.filter(w=>w.length>=5&&w.length<=6),w=easy.length?easy[Math.floor(Math.random()*easy.length)]:hmSeq(1)[0];
+        hmPlay({kind:'zen',seq:[w,...hmSeq(5)]})});
+  }
+  const hd0=window.hmDone;
+  window.hmDone=function(how,word){
+    const r=hd0.apply(this,arguments);
+    if(TOUR.step===3&&how==='solved'){clearTimeout(HM.nextT);TOUR.hm=hmDisp(word).join('').toUpperCase();xp+=Math.round(HM.score/10);sv('lr-xp',xp);setTimeout(next,1600)}
+    return r;
+  };
+
+  // the summary
+  function end(){
+    bar.hidden=true;show('hm',false);show('wh',false);show('game',false);
+    sv('lr-tour-done','1');
+    const x1=xpNow(),gain=Math.max(0,x1-TOUR.xp0),newA=Math.max(0,achN()-TOUR.ach0);
+    const row=(a,b)=>'<div><span>'+a+'</span><span>'+b+'</span></div>';
+    card('<div class="big">🎉</div><h2>'+T('Tour complete!','הסיור הושלם!')+'</h2>'+
+      '<div class="sum">'+
+        row('🟨 '+NAMES[0],TOUR.lr+' '+T('words','מילים'))+
+        row('🔍 '+NAMES[1],TOUR.wh?TOUR.wh.n+' '+T('words','מילים')+' · '+fmtN(TOUR.wh.score):'—')+
+        row('🪢 '+NAMES[2],TOUR.hm||'—')+
+        row('⭐ XP','+'+gain+' · '+T('Level ','רמה ')+lvlOf(x1))+
+        (newA?row('🏆 '+T('Achievements','הישגים'),'+'+newA):'')+
+      '</div><p>'+T('Now race the maker live, phone vs phone!','עכשיו התחרו ביוצר בזמן אמת, טלפון מול טלפון!')+'</p>',
+      '⚡ '+T('Race live','מרוץ חי'),()=>{location.replace('game.html#match');location.reload()},
+      '<button class="alt" id="tmenu">'+T('Main menu','תפריט ראשי')+'</button>');
+    $('tmenu').onclick=()=>{document.querySelectorAll('.lrtour').forEach(x=>x.remove());goMenu()};
+    finaleTour();
+  }
+  function finaleTour(){try{lrFinale(true)}catch(e){}}
+
+  // the tour's games are free (they don't use the day's free games or credits)
+  next();
 })();
 
 </script>
