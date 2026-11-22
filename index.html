@@ -2831,7 +2831,8 @@ function qrInto(el,text){try{const q=qrcode(0,'M');q.addData(text);q.make();el.i
     ['win10','👑','Champion','אלוף','Win 10 online matches','נצחו ב-10 משחקי אונליין',function(){return flag('on_10')}],
     ['egg','🔓','Secret keeper','שומר הסוד','Found the secret word hidden in the logo','גיליתם את המילה הסודית שבלוגו',function(){return flag('egg')},1],
     ['ver','🔢','Curious mind','סקרנים','Tapped the version number 7 times','הקשתם 7 פעמים על מספר הגרסה',function(){return flag('ver')},1],
-    ['night','🦉','Night owl','ינשוף לילה','Played between midnight and 5 am','שיחקתם בין חצות לחמש בבוקר',function(){return flag('night')},1]
+    ['night','🦉','Night owl','ינשוף לילה','Played between midnight and 5 am','שיחקתם בין חצות לחמש בבוקר',function(){return flag('night')},1],
+    ['cover','🛡️','Under Cover','מתחת למחסה','Tapped the hidden word on the logo, one letter at a time','הקשתם על המילה הנסתרת בלוגו, אות אחר אות',function(){return flag('cover')},1]
   ];
   var DEF=A.map(function(a){return {id:a[0],icon:a[1],t:T(a[2],a[3]),d:T(a[4],a[5]),test:a[6],secret:!!a[7]}});
 
@@ -2850,12 +2851,15 @@ function qrInto(el,text){try{const q=qrcode(0,'M');q.addData(text);q.make();el.i
       'html.lr-bouncy .sq,html.lr-bouncy .hml,html.lr-bouncy .logo span,html.lr-bouncy .wt{animation:lrbounce 1.2s ease-in-out infinite!important}'+
       'html.lr-bouncy .sq:nth-child(2n),html.lr-bouncy .hml:nth-child(2n),html.lr-bouncy .logo span:nth-child(2n),html.lr-bouncy .wt:nth-child(2n){animation-delay:.3s!important}'+
       '@keyframes lrbounce{0%,100%{translate:0 0}50%{translate:0 -6px}}'+
+      ':root.lr-bunker.lr-bunker{--bg:#55595e;--dot:#64686d;--card:#e4e2dc;--ink:#1e2023;--mute:#55585c;--line:#a8a6a0;--acc:#d49b00;--hl:#ffcc00;--hl-d:#a88600;--tile:#d2d0c9;--tile-d:#8d8c86;color-scheme:light}'+
+      'html.lr-bunker .logo span.r,html.lr-bunker .sq.hl,html.lr-bunker .tourb{background:repeating-linear-gradient(-45deg,#ffcc00 0 9px,#26282b 9px 18px)!important;color:#fff!important;text-shadow:0 0 3px #000,0 0 6px #000}'+
+      'html.lr-bunker .logo span{border-radius:6px!important}html.lr-bunker .game{filter:saturate(.55)}'+
       'html.lr-gold .logo span{background:linear-gradient(160deg,#ffe680,#f5b800)!important;border-color:#c99a06!important;box-shadow:0 5px 0 #a07800!important;color:#5a3d00!important}'+
       '.lrconfirm{position:fixed;inset:0;z-index:9998;display:grid;place-items:center;background:rgba(10,8,40,.45);padding:16px}'+
       '.lrconfirm .card{max-width:360px;width:100%;animation:achpop .35s cubic-bezier(.34,1.56,.64,1)}@keyframes achpop{from{transform:scale(.7);opacity:0}}';
     document.head.appendChild(s);
   }
-  function looks(){var h=document.documentElement;h.classList.toggle('lr-disco',L('lr-look-disco')==='1');h.classList.toggle('lr-bouncy',L('lr-look-bouncy')==='1');h.classList.toggle('lr-gold',L('lr-look-gold')==='1')}
+  function looks(){var h=document.documentElement;h.classList.toggle('lr-disco',L('lr-look-disco')==='1');h.classList.toggle('lr-bouncy',L('lr-look-bouncy')==='1');h.classList.toggle('lr-gold',L('lr-look-gold')==='1');h.classList.toggle('lr-bunker',L('lr-look-bunker')==='1')}
   function toast(a){
     queue.push(a);if(showing)return;
     (function next(){
@@ -2925,6 +2929,7 @@ $('lvlb').onclick=$('trophy').onclick;
 /* the Secret Lab */
 var LOOKS=[['disco','🌈',T('Disco mode','מצב דיסקו'),T('Colours that never stop','צבעים שלא נגמרים')],['bouncy','🎈',T('Bouncy tiles','אותיות קופצות'),T('Every letter tile dances','כל אות רוקדת')],['gold','👑',T('Golden logo','לוגו זהב'),T('For those who know','למי שיודע')]];
 function lab(){
+  try{if(JSON.parse(localStorage.getItem('lr-achf')||'{}').cover&&!LOOKS.some(function(l){return l[0]==='bunker'}))LOOKS.push(['bunker','🧱',T('Bunker','בונקר'),T('Concrete and hazard stripes. You found cover.','בטון ופסי אזהרה. מצאתם מחסה.')])}catch(e){}
   $('labt').textContent='🔓 '+T('Secret Lab','המעבדה הסודית');$('labsum').textContent=T('You found it. These looks work everywhere in the app.','מצאתם! המראות האלה עובדים בכל האפליקציה.');
   $('lablist').innerHTML=LOOKS.map(function(l){var on=st('lr-look-'+l[0])==='1';return '<button class="labt'+(on?' on':'')+'" data-k="'+l[0]+'"><span>'+l[1]+' '+l[2]+'<br><small style="font-weight:600;opacity:.7">'+l[3]+'</small></span><em>'+(on?T('On','פועל'):T('Off','כבוי'))+'</em></button>'}).join('')+
     '<div class="tr on" style="display:block"><b>'+T('Credits','קרדיטים')+'</b><small>'+T('Letter Rush · 4 games · 2 languages · made with a lot of coffee. Hebrew words: Hspell (AGPL). Thanks for playing!','מרוץ אותיות · 4 משחקים · 2 שפות · נבנה עם הרבה קפה. מילים בעברית: Hspell (AGPL). תודה ששיחקתם!')+'</small></div>';
@@ -2947,7 +2952,27 @@ function end(){
   if(!path.length)return;var w=fold(path.map(function(t){return t.textContent}).join('')).toUpperCase(),n=path.length;
   path.forEach(function(t){t.classList.remove('sel')});path=[];
   if(w===fold(SECRET)){logo.classList.add('win');try{SFX.play('crown');SFX.play('correct')}catch(e){}ACH.mark('egg');setTimeout(function(){logo.classList.remove('win');window.lrOpenLab()},900)}
-  else if(moved&&n>=3){logo.classList.remove('shake');void logo.offsetWidth;logo.classList.add('shake');try{SFX.play('wrong')}catch(e){}}
+  else if(!moved&&n===1)tapEgg(w);
+  if(moved&&n>=3&&w!==fold(SECRET)){logo.classList.remove('shake');void logo.offsetWidth;logo.classList.add('shake');try{SFX.play('wrong')}catch(e){}}
+}
+var TAPS='',tapT=0;
+function tapEgg(c){
+  if(he)return;
+  var now=Date.now();if(now-tapT>2500)TAPS='';tapT=now;
+  TAPS=(TAPS+c).slice(-7);
+  if('SHELTER'.indexOf(TAPS)!==0){TAPS=c==='S'?'S':'';return}
+  if(TAPS!=='SHELTER')return;
+  TAPS='';
+  var got=false;try{got=JSON.parse(localStorage.getItem('lr-achf')||'{}').cover}catch(x){}
+  logo.classList.add('win');try{SFX.play('crown');SFX.play('correct')}catch(x){}try{navigator.vibrate([40,60,40,60,120])}catch(x){}
+  setTimeout(function(){logo.classList.remove('win')},900);
+  if(got){var t=document.createElement('div');t.className='coinfly';t.textContent='🛡️ '+T('Already under cover','כבר במחסה');document.body.appendChild(t);setTimeout(function(){t.remove()},1600);return}
+  try{localStorage.setItem('lr-credits',String((+localStorage.getItem('lr-credits')||0)+5))}catch(x){}
+  try{localStorage.setItem('lr-look-bunker','1')}catch(x){}
+  ACH.mark('cover');ACH.looks();
+  try{$('coinc').textContent=PAY.unlimited()?'∞':PAY.credits()}catch(x){}
+  var b=$('coinb');if(b){b.classList.remove('bump');void b.offsetWidth;b.classList.add('bump')}
+  var f=document.createElement('div');f.className='coinfly';f.textContent='+5 🪙 · 🧱 '+T('Bunker look unlocked','מראה בונקר נפתח');document.body.appendChild(f);setTimeout(function(){f.remove()},2200);
 }
 logo.addEventListener('pointerup',end);logo.addEventListener('pointercancel',end);
 // every few seconds a wave runs through the logo
@@ -3198,5 +3223,16 @@ hud2();setInterval(hud2,2000);
   var home=document.getElementById('home');home.insertBefore(b,home.firstChild);
   b.onclick=function(){nav('game.html#tour')};
 })();
+</script>
+<style>
+#coinb{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);inset-inline-end:max(14px,env(safe-area-inset-right,0px));z-index:5;padding:8px 14px;border-radius:14px;font-size:1rem}
+#coinb[hidden]{display:none}
+#coinb.bump{animation:coinbump .6s cubic-bezier(.34,1.56,.64,1)}@keyframes coinbump{40%{transform:scale(1.35) rotate(-6deg)}}
+.coinfly{position:fixed;top:42%;left:50%;transform:translateX(-50%);z-index:9999;padding:10px 16px;border-radius:16px;background:#20b26c;color:#fff;font-weight:800;box-shadow:0 4px 0 #13814c;white-space:nowrap;animation:coinfly 2.2s ease both;pointer-events:none}
+@keyframes coinfly{0%{opacity:0;transform:translate(-50%,10px) scale(.8)}12%{opacity:1;transform:translate(-50%,0) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-14px)}}
+</style>
+<script>
+(function(){var c=document.getElementById('coinb');if(c)document.body.appendChild(c)})();  // out of the animated level row, so it can sit in the corner
+(function(){var v=window.view;if(typeof v!=='function')return;window.view=function(x){var r=v.apply(this,arguments);var b=document.getElementById('coinb');if(b)b.hidden=x!=='home';return r}})();
 </script>
 </body></html>

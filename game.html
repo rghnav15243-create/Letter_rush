@@ -4709,7 +4709,8 @@ const SFX=(()=>{
     ['win10','👑','Champion','אלוף','Win 10 online matches','נצחו ב-10 משחקי אונליין',function(){return flag('on_10')}],
     ['egg','🔓','Secret keeper','שומר הסוד','Found the secret word hidden in the logo','גיליתם את המילה הסודית שבלוגו',function(){return flag('egg')},1],
     ['ver','🔢','Curious mind','סקרנים','Tapped the version number 7 times','הקשתם 7 פעמים על מספר הגרסה',function(){return flag('ver')},1],
-    ['night','🦉','Night owl','ינשוף לילה','Played between midnight and 5 am','שיחקתם בין חצות לחמש בבוקר',function(){return flag('night')},1]
+    ['night','🦉','Night owl','ינשוף לילה','Played between midnight and 5 am','שיחקתם בין חצות לחמש בבוקר',function(){return flag('night')},1],
+    ['cover','🛡️','Under Cover','מתחת למחסה','Tapped the hidden word on the logo, one letter at a time','הקשתם על המילה הנסתרת בלוגו, אות אחר אות',function(){return flag('cover')},1]
   ];
   var DEF=A.map(function(a){return {id:a[0],icon:a[1],t:T(a[2],a[3]),d:T(a[4],a[5]),test:a[6],secret:!!a[7]}});
 
@@ -4728,12 +4729,15 @@ const SFX=(()=>{
       'html.lr-bouncy .sq,html.lr-bouncy .hml,html.lr-bouncy .logo span,html.lr-bouncy .wt{animation:lrbounce 1.2s ease-in-out infinite!important}'+
       'html.lr-bouncy .sq:nth-child(2n),html.lr-bouncy .hml:nth-child(2n),html.lr-bouncy .logo span:nth-child(2n),html.lr-bouncy .wt:nth-child(2n){animation-delay:.3s!important}'+
       '@keyframes lrbounce{0%,100%{translate:0 0}50%{translate:0 -6px}}'+
+      ':root.lr-bunker.lr-bunker{--bg:#55595e;--dot:#64686d;--card:#e4e2dc;--ink:#1e2023;--mute:#55585c;--line:#a8a6a0;--acc:#d49b00;--hl:#ffcc00;--hl-d:#a88600;--tile:#d2d0c9;--tile-d:#8d8c86;color-scheme:light}'+
+      'html.lr-bunker .logo span.r,html.lr-bunker .sq.hl,html.lr-bunker .tourb{background:repeating-linear-gradient(-45deg,#ffcc00 0 9px,#26282b 9px 18px)!important;color:#fff!important;text-shadow:0 0 3px #000,0 0 6px #000}'+
+      'html.lr-bunker .logo span{border-radius:6px!important}html.lr-bunker .game{filter:saturate(.55)}'+
       'html.lr-gold .logo span{background:linear-gradient(160deg,#ffe680,#f5b800)!important;border-color:#c99a06!important;box-shadow:0 5px 0 #a07800!important;color:#5a3d00!important}'+
       '.lrconfirm{position:fixed;inset:0;z-index:9998;display:grid;place-items:center;background:rgba(10,8,40,.45);padding:16px}'+
       '.lrconfirm .card{max-width:360px;width:100%;animation:achpop .35s cubic-bezier(.34,1.56,.64,1)}@keyframes achpop{from{transform:scale(.7);opacity:0}}';
     document.head.appendChild(s);
   }
-  function looks(){var h=document.documentElement;h.classList.toggle('lr-disco',L('lr-look-disco')==='1');h.classList.toggle('lr-bouncy',L('lr-look-bouncy')==='1');h.classList.toggle('lr-gold',L('lr-look-gold')==='1')}
+  function looks(){var h=document.documentElement;h.classList.toggle('lr-disco',L('lr-look-disco')==='1');h.classList.toggle('lr-bouncy',L('lr-look-bouncy')==='1');h.classList.toggle('lr-gold',L('lr-look-gold')==='1');h.classList.toggle('lr-bunker',L('lr-look-bunker')==='1')}
   function toast(a){
     queue.push(a);if(showing)return;
     (function next(){
