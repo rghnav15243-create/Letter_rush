@@ -180,7 +180,7 @@ input:focus{outline:none;border-color:var(--acc)}
 
 const SFX=(()=>{
   /* Letter Rush sound engine: everything is synthesized live (no audio files). Warm layered voices,
-     a small room reverb, and a gentle background music loop that can be switched off. */
+     a small room reverb, and background music (two chiptune loops) that can be switched off. */
   let ac=null,master=null,fx=null,musBus=null,noiseBuf=null;
   const muted=()=>{try{if(typeof snd!=='undefined')return !snd}catch(e){}try{return localStorage.getItem('lr-snd')==='0'}catch(e){return false}};
   const musicOn=()=>{try{return localStorage.getItem('lr-music')!=='0'}catch(e){return true}};
@@ -251,34 +251,37 @@ const SFX=(()=>{
     back(){noise({d:.32,v:.13,f:3600,q:1.1,to:280,pan:.8,pto:-.8});osc(420,{d:.28,v:.04,to:160,wet:.2})},
     blip(f=660){mallet(f,{d:.16,v:.09})}
   };
-  /* ---- background music: a calm loop, made up as it plays ---- */
-  const BPM=96,STEP=60/BPM/2;
-  const PROG=[[48,52,55],[45,48,52],[41,45,48],[43,47,50],[41,45,48],[43,47,50],[40,43,47],[45,48,52]];
-  const PAT=[[0,1,2,1,0,1,2,1],[0,2,1,2,0,2,1,2],[2,1,0,1,2,1,0,-1],[0,-1,1,2,-1,2,1,0]];
-  let mOn=false,mTimer=null,next=0,step=0,pat=0;
-  function schedule(){
-    const A=ctx();if(!A||!mOn)return;
-    while(next<A.currentTime+.35){
-      const t=next-A.currentTime,bar=Math.floor(step/8)%PROG.length,s=step%8,ch=PROG[bar],big=Math.floor(step/8)%16;
-      if(s===0){pat=Math.floor(Math.random()*PAT.length);
-        ch.forEach(m=>{osc(m2f(m+12),{t,d:STEP*8.2,type:'triangle',v:.05,a:.35,lp:1400,bus:musBus,wet:.5,det:-7});osc(m2f(m+12),{t,d:STEP*8.2,type:'triangle',v:.04,a:.4,lp:1400,bus:musBus,wet:.5,det:7})})}
-      if(s===0||s===4){osc(m2f(ch[0]-12),{t,d:STEP*3.5,type:'triangle',v:.16,a:.01,lp:600,bus:musBus,wet:.05});osc(m2f(ch[0]-12),{t,d:STEP*3.5,type:'sine',v:.12,bus:musBus,wet:0})}
-      const n=PAT[pat][s];if(n>=0&&Math.random()>.12)bell(m2f(ch[n]+24),{t,d:.7,v:.035,bus:musBus});
-      if(big<14){
-        if(s===0||s===4)osc(150,{t,d:.22,type:'sine',v:.22,to:45,bus:musBus,wet:0});
-        if(s%2===1)noise({t,d:.04,v:.025,f:8000,type:'highpass',bus:musBus,wet:0});
-        if((s===2||s===6)&&big>=2)noise({t,d:.12,v:.035,f:1900,q:.9,bus:musBus,wet:.2});
-      }
-      next+=STEP;step++;
-    }
+  /* ---- background music: chiptune loops by Juhani Junkala (Chiptune Adventures, CC0).
+     The menu plays "Stage Select", the games play "Boss Fight". Each track is a small .js file
+     (so the app's auto-update can deliver it), loaded only when music is on. ---- */
+  const TRACK=/game/.test(location.pathname)?'game':'menu',MVOL=TRACK==='game'?.26:.32;
+  let mOn=false,src=null,buf=null,loading=null;
+  function load(){
+    if(buf)return Promise.resolve(buf);if(loading)return loading;
+    const key='LR_MUSIC_'+TRACK;
+    loading=new Promise((res,rej)=>{if(window[key])return res(window[key]);
+        const s=document.createElement('script');s.src='music_'+TRACK+'.js';s.onload=()=>window[key]?res(window[key]):rej();s.onerror=rej;document.head.appendChild(s)})
+      .then(d=>{const bin=atob(d),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);window[key]=null;
+        return new Promise((res,rej)=>ctx().decodeAudioData(u.buffer,res,rej))})
+      .then(b=>buf=b).catch(e=>{loading=null;throw e});
+    return loading;
   }
   function musicStart(){
     const A=ctx();if(!A||mOn||!musicOn()||document.hidden)return;
-    mOn=true;next=A.currentTime+.1;step=0;
-    musBus.gain.cancelScheduledValues(A.currentTime);musBus.gain.setValueAtTime(0,A.currentTime);musBus.gain.linearRampToValueAtTime(.5,A.currentTime+2.5);
-    clearInterval(mTimer);mTimer=setInterval(schedule,90);schedule();
+    mOn=true;
+    load().then(b=>{
+      if(!mOn||src)return;
+      src=A.createBufferSource();src.buffer=b;src.loop=true;src.connect(musBus);
+      const t=A.currentTime;musBus.gain.cancelScheduledValues(t);musBus.gain.setValueAtTime(0,t);musBus.gain.linearRampToValueAtTime(MVOL,t+1.2);
+      src.start();
+    }).catch(()=>{mOn=false});
   }
-  function musicStop(){mOn=false;clearInterval(mTimer);if(ac&&musBus){musBus.gain.cancelScheduledValues(ac.currentTime);musBus.gain.setValueAtTime(musBus.gain.value,ac.currentTime);musBus.gain.linearRampToValueAtTime(0,ac.currentTime+.4)}}
+  function musicStop(){
+    mOn=false;if(!ac||!musBus)return;
+    const t=ac.currentTime,s=src;src=null;
+    musBus.gain.cancelScheduledValues(t);musBus.gain.setValueAtTime(musBus.gain.value,t);musBus.gain.linearRampToValueAtTime(0,t+.4);
+    if(s)setTimeout(()=>{try{s.stop()}catch(e){}},450);
+  }
   const unlock=()=>{const a=ctx();if(a&&a.state==='suspended')a.resume().catch(()=>{});if(musicOn())musicStart()};
   ['pointerdown','keydown','touchstart'].forEach(e=>addEventListener(e,unlock,{passive:true,capture:true}));
   document.addEventListener('visibilitychange',()=>{if(document.hidden)musicStop();else if(musicOn()&&ac&&ac.state!=='suspended')musicStart()});
@@ -286,7 +289,7 @@ const SFX=(()=>{
     play(n,a){if(muted()||!S[n])return;try{if(!ctx())return;if(ac.state==='suspended')ac.resume().catch(()=>{});S[n](a)}catch(e){}},
     music(on){try{localStorage.setItem('lr-music',on?'1':'0')}catch(e){}if(on){ctx();if(ac&&ac.state==='suspended')ac.resume().catch(()=>{});musicStart()}else musicStop()},
     musicOn,
-    playing:()=>mOn
+    playing:()=>mOn,track:TRACK
   };
 })();
 
@@ -2932,7 +2935,7 @@ function lab(){
   try{if(JSON.parse(localStorage.getItem('lr-achf')||'{}').cover&&!LOOKS.some(function(l){return l[0]==='bunker'}))LOOKS.push(['bunker','🧱',T('Bunker','בונקר'),T('Concrete and hazard stripes. You found cover.','בטון ופסי אזהרה. מצאתם מחסה.')])}catch(e){}
   $('labt').textContent='🔓 '+T('Secret Lab','המעבדה הסודית');$('labsum').textContent=T('You found it. These looks work everywhere in the app.','מצאתם! המראות האלה עובדים בכל האפליקציה.');
   $('lablist').innerHTML=LOOKS.map(function(l){var on=st('lr-look-'+l[0])==='1';return '<button class="labt'+(on?' on':'')+'" data-k="'+l[0]+'"><span>'+l[1]+' '+l[2]+'<br><small style="font-weight:600;opacity:.7">'+l[3]+'</small></span><em>'+(on?T('On','פועל'):T('Off','כבוי'))+'</em></button>'}).join('')+
-    '<div class="tr on" style="display:block"><b>'+T('Credits','קרדיטים')+'</b><small>'+T('Letter Rush · 4 games · 2 languages · made with a lot of coffee. Hebrew words: Hspell (AGPL). Thanks for playing!','מרוץ אותיות · 4 משחקים · 2 שפות · נבנה עם הרבה קפה. מילים בעברית: Hspell (AGPL). תודה ששיחקתם!')+'</small></div>';
+    '<div class="tr on" style="display:block"><b>'+T('Credits','קרדיטים')+'</b><small>'+T('Letter Rush · 4 games · 2 languages · made with a lot of coffee. Hebrew words: Hspell (AGPL). Music: Juhani Junkala, Chiptune Adventures (CC0). Thanks for playing!','מרוץ אותיות · 4 משחקים · 2 שפות · נבנה עם הרבה קפה. מילים בעברית: Hspell (AGPL). מוזיקה: Juhani Junkala, Chiptune Adventures (CC0). תודה ששיחקתם!')+'</small></div>';
   document.querySelectorAll('#lablist .labt').forEach(function(b){b.onclick=function(){var k='lr-look-'+b.dataset.k;sv(k,st(k)==='1'?'0':'1');ACH.looks();try{SFX.play('crown')}catch(e){}lab()}});
 }
 window.lrOpenLab=function(){lab();view('labv')};

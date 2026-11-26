@@ -1,11 +1,13 @@
 {
- "web": 107,
+ "web": 108,
  "minApk": 18,
  "apk": 21,
  "apkUrl": "LetterRush.apk",
  "files": {
-  "launcher.html": "75a7ec7526881e6630d478ce25b915c9f703fda61d8dc4f6937f162d6cb83676",
-  "game.html": "672958535806e8705c27cc6c9fcf51d0ca91a923fcff5ccb796c00893ff745cf",
-  "he_dict.js": "dd83761bd0ee2fc5848e5223f88f622a3f257fb43ed4aecd183429eb17714611"
+  "launcher.html": "361e0a690b2fe647a7621c1d04b23bc941ef32427376e075ea756e50552445de",
+  "game.html": "8362a814c2d92aa115dee2fe0bbdb498a9def4a236ab145c45937f7a4260fbe9",
+  "he_dict.js": "dd83761bd0ee2fc5848e5223f88f622a3f257fb43ed4aecd183429eb17714611",
+  "music_menu.js": "7f1b0723735f005805dcca238f2b72405e9b925d80af90f2a11e89138fa4c880",
+  "music_game.js": "f78f1ed5049a3f9b3a855f5acb459f8f78c99e2571d4147176fca1e494bb6b16"
  }
 }
